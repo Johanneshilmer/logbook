@@ -10,6 +10,7 @@ import Search from './pages/search';
 
 function App() {
   return (
+    // Routings
     <HashRouter>
       <Routes>
         <Route path='/' element={<Augustiner/>}/>
