@@ -5,11 +5,11 @@ import Row from 'react-bootstrap/Row';
 import { FloatingLabel } from 'react-bootstrap';
 
 // Top-Bot-Setup
-import { useState } from 'react';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
-// Form 
+//Hooks
+import React, { useState } from 'react';
 
 export default function Forms() {
   
@@ -21,37 +21,32 @@ export default function Forms() {
     { name: 'SETUP', value: 'SETUP' },
   ];
 
-  //Form data 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const formData = {
-      name: event.target.elements.name.value,
-      workOrder: event.target.elements.workOrder.value,
-      program: event.target.elements.program.value,
-      radios: event.target.elements.radio.value,
-      ST: event.target.elements.ST.value,
-      comment: event.target.elements.comment.value,
-    };
-    const serializedBody = JSON.stringify(formData);
-    const fetchOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: serializedBody,
-    };
-    fetch("/register", fetchOptions)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        // Handle successful response
-      })
-      .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-      });
+  const [dataForm, setForm] = useState({
+    name: "",
+    workOrder: "",
+    program: "",
+    radios: "",
+    solderTest: false,
+    comment: "",
+  });
+  // e == "event"
+  const handleChange = e => {
+    const { name, value, type, checked } = e.target;
+
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: type === "switch" ? checked : value,
+    }));
+
+    if (type === "radio") {
+      setRadioValue(value);
+    }
   };
   
+  const handleSubmit = e => {
+    e.preventDefault()
+    console.log(dataForm);
+  }
 
 
   return (
@@ -59,20 +54,20 @@ export default function Forms() {
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formId">
           <FloatingLabel label="Enter Your ID">
-            <Form.Control type="text" placeholder="Your ID" name="name" />
+            <Form.Control type="text" placeholder="Your ID" value={dataForm.name} name="name" onChange={handleChange} />
           </FloatingLabel>
         </Form.Group>
 
         <Form.Group as={Col} controlId="formWordOrder">
           <FloatingLabel label="Work Order">
-            <Form.Control type="text" placeholder="Work Order" name="workOrder" />
+            <Form.Control type="text" placeholder="Work Order" value={dataForm.workOrder} name="workOrder" onChange={handleChange} />
           </FloatingLabel>
         </Form.Group>
       </Row>
 
       <Form.Group className="mb-3" controlId="formProgram">
         <FloatingLabel label="Seplace Program">
-          <Form.Control placeholder="Siplace Program" name="program" />
+          <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} />
         </FloatingLabel>
       </Form.Group>
 
@@ -86,10 +81,10 @@ export default function Forms() {
                 id={`radio-${idx}`}
                 type="radio"
                 variant={idx % 2 ? 'outline-success' : 'outline-danger'}
-                name="radio"
+                name="radios"
                 value={radio.value}
-                checked={radioValue === radio.value}
-                onChange={(e) => setRadioValue(e.currentTarget.value)}
+                checked={dataForm.radios === radio.value}
+                onChange={handleChange}
               >
                 {radio.name}
               </ToggleButton>
@@ -97,7 +92,7 @@ export default function Forms() {
           </ButtonGroup>
         </Col>
         <Col>
-          <Form.Check className='mt-2' type="switch" id="custom-switch" label="Solderability Test" name="ST" />
+          <Form.Check className='mt-2' type="switch" checked={dataForm.solderTest} id="custom-switch" label="Solderability Test" name="solderTest" onChange={handleChange} />
         </Col>
       </Row>
       
@@ -105,7 +100,7 @@ export default function Forms() {
     {/* Comment */}
       <Form.Group className='mb-3' controlId="floatingTextarea">
         <FloatingLabel label="Comments">
-          <Form.Control as="textarea" placeholder="Comments" style={{ height: '80px' }} name="comment" />
+          <Form.Control as="textarea" placeholder="Comments" style={{ height: '80px' }} value={dataForm.comment} name="comment" onChange={handleChange} />
         </FloatingLabel>
       </Form.Group>
 
