@@ -35,7 +35,7 @@ export default function Forms() {
 
     setForm((prevForm) => ({
       ...prevForm,
-      [name]: type === "switch" ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
 
     if (type === "radio") {
@@ -77,7 +77,7 @@ export default function Forms() {
           <ButtonGroup className='mt-1 mb-4'>
             {radios.map((radio, idx) => (
               <ToggleButton
-                key={idx}
+                key={radio.value}
                 id={`radio-${idx}`}
                 type="radio"
                 variant={idx % 2 ? 'outline-success' : 'outline-danger'}
