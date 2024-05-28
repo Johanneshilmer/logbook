@@ -6,6 +6,10 @@ import Forms from '../components/Forms'
 import Timer from '../components/Timer'
 import Tables from '../components/Tables'
 
+
+
+const dataForm = [dataForm]
+
 function Augustiner() {
   return(
     <div>
@@ -25,7 +29,7 @@ function Augustiner() {
 
         <Row className="mt-5">
           {/* Table */}
-          <Tables />
+          <Tables dataForm={dataForm} />
         </Row>
       </Container>
     </div>
