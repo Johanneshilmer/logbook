@@ -1,4 +1,5 @@
 import { Container, Row, Col } from "react-bootstrap";
+import React, { useState } from "react";
 
 // Components
 import Header from  '../components/Header'
@@ -8,9 +9,16 @@ import Tables from '../components/Tables'
 
 
 
-const dataForm = [""]
+const dataForms = [
+  {id: 1,},
+  {id: 2},
+]
 
 function Augustiner() {
+
+  const [dataList, setDataList] = useState(dataForms)
+  console.log('app.js', dataList);
+
   return(
     <div>
             <Header />
@@ -19,7 +27,7 @@ function Augustiner() {
         <Row>
           <Col>
           {/* Form here */}
-            <Forms />
+            <Forms dataForms={dataForms} setDataForms={setDataList} />
           </Col>
           <Col>
           {/* Timer here */}
@@ -29,7 +37,7 @@ function Augustiner() {
 
         <Row className="mt-5">
           {/* Table */}
-          <Tables dataForm={dataForm} />
+          <Tables dataForms={dataList} />
         </Row>
       </Container>
     </div>

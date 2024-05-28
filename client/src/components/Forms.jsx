@@ -11,7 +11,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 //Hooks
 import React, { useState } from 'react';
 
-export default function Forms() {
+export default function Forms({ dataForms, setDataForms }) {
   
   // Button TOP/BOT/SETUP
   const [radioValue, setRadioValue] = useState('1');
@@ -45,7 +45,7 @@ export default function Forms() {
   
   const handleSubmit = e => {
     e.preventDefault()
-    console.log(dataForm);
+    setDataForms([...dataForms, dataForm])
   }
 
 
