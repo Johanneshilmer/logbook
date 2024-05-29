@@ -13,7 +13,7 @@ export default function Tables({ dataForms }) {
         <td>{items.program}</td>
         <td>{items.radios}</td>
         <td>Worktime</td>
-        <td>{items.solderTest}</td>
+        <td>{items.solderTest?"Y":"N"}</td>
         <td>{items.name}</td>
         <td>{items.comment}</td>
         <td>Change</td>

@@ -31,6 +31,7 @@ export default function Forms({ dataForms, setDataForms }) {
         + ':' + newDate.getMinutes() 
         + ":" + newDate.getSeconds();
 
+
   const [dataForm, setForm] = useState({
     name: "",
     workOrder: "",
