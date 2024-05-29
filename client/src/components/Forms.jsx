@@ -21,6 +21,16 @@ export default function Forms({ dataForms, setDataForms }) {
     { name: 'SETUP', value: 'SETUP' },
   ];
 
+
+  let newDate = new Date()
+  let date = newDate.getDate();
+  let month = newDate.getMonth() + 1;
+  let year = newDate.getFullYear();
+
+  const showTime = newDate.getHours() 
+        + ':' + newDate.getMinutes() 
+        + ":" + newDate.getSeconds();
+
   const [dataForm, setForm] = useState({
     name: "",
     workOrder: "",
@@ -28,6 +38,8 @@ export default function Forms({ dataForms, setDataForms }) {
     radios: "",
     solderTest: false,
     comment: "",
+    date: `${year}/${month<10?`0${month}`:`${month}`}/${date}`,
+    time: showTime,
   });
   // e == "event"
   const handleChange = e => {

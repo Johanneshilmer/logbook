@@ -10,8 +10,6 @@ import Tables from '../components/Tables'
 
 
 const dataForms = [
-  {id: 1,},
-  {id: 2},
 ]
 
 function Augustiner() {
@@ -27,7 +25,7 @@ function Augustiner() {
         <Row>
           <Col>
           {/* Form here */}
-            <Forms dataForms={dataForms} setDataForms={setDataList} />
+            <Forms dataForms={dataList} setDataForms={setDataList} />
           </Col>
           <Col>
           {/* Timer here */}

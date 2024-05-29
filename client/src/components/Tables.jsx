@@ -1,15 +1,22 @@
 import Table from 'react-bootstrap/Table';
-import { useState } from 'react';
+import React from 'react';
 
-export default function Tables() {
+export default function Tables({ dataForms }) {
 
-  const Forms = useState();
 
-  const tableRows = Forms.map((info) => {
+  const tableRows = dataForms.map((items) => {
     return (
-      <tr>
-        <td>info.name</td>
-        <td>info.workOrder</td>
+      <tr key={items.id}>
+        <td>{items.date}</td>
+        <td>{items.time}</td>
+        <td>{items.workOrder}</td>
+        <td>{items.program}</td>
+        <td>{items.radios}</td>
+        <td>Worktime</td>
+        <td>{items.solderTest}</td>
+        <td>{items.name}</td>
+        <td>{items.comment}</td>
+        <td>Change</td>
       </tr>
     );
   });
