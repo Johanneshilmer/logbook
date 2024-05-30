@@ -1,3 +1,7 @@
 h1{
   text-decoration: underline;
 }
+
+.editbtn {
+  margin-right: 6px;
+}

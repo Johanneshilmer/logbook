@@ -58,7 +58,7 @@ export default function Forms({ dataForms, setDataForms }) {
   
   const handleSubmit = e => {
     e.preventDefault()
-    setDataForms([...dataForms, dataForm])
+    setDataForms([dataForm, ...dataForms ])
   }
 
 

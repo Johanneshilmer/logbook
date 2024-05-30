@@ -1,5 +1,6 @@
 import Table from 'react-bootstrap/Table';
 import React from 'react';
+import Button from 'react-bootstrap/Button';
 
 export default function Tables({ dataForms }) {
 
@@ -16,7 +17,10 @@ export default function Tables({ dataForms }) {
         <td>{items.solderTest?"Y":"N"}</td>
         <td>{items.name}</td>
         <td>{items.comment}</td>
-        <td>Change</td>
+        <td>
+          <Button className='editbtn' variant="secondary">Edit</Button>
+          <Button className='deletebtn' variant="danger">Delete</Button>
+        </td>
       </tr>
     );
   });
