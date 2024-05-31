@@ -2,7 +2,13 @@ import Table from 'react-bootstrap/Table';
 import React from 'react';
 import Button from 'react-bootstrap/Button';
 
-export default function Tables({ dataForms }) {
+export default function Tables({ dataForms, dataList }) {
+
+  const deleteHandler = () => {
+    const newList = dataList.filter(item => {
+      item.id !== 
+    });
+  };
 
 
   const tableRows = dataForms.map((items) => {
@@ -19,7 +25,7 @@ export default function Tables({ dataForms }) {
         <td>{items.comment}</td>
         <td>
           <Button className='editbtn' variant="secondary">Edit</Button>
-          <Button className='deletebtn' variant="danger">Delete</Button>
+          <Button className='deletebtn' variant="danger" onClick={deleteHandler}>Delete</Button>
         </td>
       </tr>
     );
