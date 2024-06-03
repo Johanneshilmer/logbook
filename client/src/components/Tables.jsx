@@ -6,11 +6,15 @@ export default function Tables({ dataForms, dataList }) {
 
   const deleteHandler = id => {
     const newList = dataList.filter(item => {
-      return item.id !== id
+      return item.id !== id;
     });
 
     dataList(newList);
   };
+
+  const updateHandler = () => {
+    //update
+  }
 
 
   const tableRows = dataForms.map((items) => {
@@ -26,8 +30,8 @@ export default function Tables({ dataForms, dataList }) {
         <td>{items.name}</td>
         <td>{items.comment}</td>
         <td>
-          <Button className='editbtn' variant="secondary">Edit</Button>
-          <Button className='deletebtn' variant="danger" onClick={deleteHandler}>Delete</Button>
+          <Button className='editbtn' variant="secondary" onClick={updateHandler}>Edit</Button>
+          <Button className='deletebtn' variant="danger" onClick={() => deleteHandler(dataList.id)}>Delete</Button>
         </td>
       </tr>
     );
