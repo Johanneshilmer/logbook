@@ -4,10 +4,12 @@ import Button from 'react-bootstrap/Button';
 
 export default function Tables({ dataForms, dataList }) {
 
-  const deleteHandler = () => {
+  const deleteHandler = id => {
     const newList = dataList.filter(item => {
-      item.id !== 
+      return item.id !== id
     });
+
+    dataList(newList);
   };
 
 
