@@ -13,7 +13,7 @@ export default function Tables({ dataForms, dataList }) {
   };
 
   const updateHandler = () => {
-    //update
+    //update, will fix this to morrow.
   }
 
 
