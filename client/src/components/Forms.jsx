@@ -8,21 +8,17 @@ import { FloatingLabel } from 'react-bootstrap';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
-//Hooks
+// Hooks
 import React, { useState } from 'react';
 
 export default function Forms({ dataForms, setDataForms }) {
-  
-  // Button TOP/BOT/SETUP
-  const [radioValue, setRadioValue] = useState('1');
   const radios = [
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOTTOM' },
     { name: 'SETUP', value: 'SETUP' },
   ];
 
-
-  let newDate = new Date()
+  let newDate = new Date();
   let date = newDate.getDate();
   let month = newDate.getMonth() + 1;
   let year = newDate.getFullYear();
@@ -31,17 +27,17 @@ export default function Forms({ dataForms, setDataForms }) {
         + ':' + newDate.getMinutes() 
         + ":" + newDate.getSeconds();
 
-
   const [dataForm, setForm] = useState({
     name: "",
     workOrder: "",
     program: "",
-    radios: "",
+    radios: radios[0].value,
     solderTest: false,
     comment: "",
-    date: `${year}/${month<10?`0${month}`:`${month}`}/${date}`,
+    date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
     time: showTime,
   });
+
   // e == "event"
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
@@ -50,17 +46,23 @@ export default function Forms({ dataForms, setDataForms }) {
       ...prevForm,
       [name]: type === "checkbox" ? checked : value,
     }));
-
-    if (type === "radio") {
-      setRadioValue(value);
-    }
   };
   
   const handleSubmit = e => {
-    e.preventDefault()
-    setDataForms([dataForm, ...dataForms ])
+    e.preventDefault();
+    setDataForms([dataForm, ...dataForms ]);
+    // Reset the form after submission
+    setForm({
+      name: "",
+      workOrder: "",
+      program: "",
+      radios: radios[0].value,
+      solderTest: false,
+      comment: "",
+      date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
+      time: showTime,
+    });
   }
-
 
   return (
     <Form onSubmit={handleSubmit} method="POST">
@@ -79,7 +81,7 @@ export default function Forms({ dataForms, setDataForms }) {
       </Row>
 
       <Form.Group className="mb-3" controlId="formProgram">
-        <FloatingLabel label="Seplace Program">
+        <FloatingLabel label="Siplace Program">
           <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} />
         </FloatingLabel>
       </Form.Group>
@@ -109,8 +111,7 @@ export default function Forms({ dataForms, setDataForms }) {
         </Col>
       </Row>
       
-
-    {/* Comment */}
+      {/* Comment */}
       <Form.Group className='mb-3' controlId="floatingTextarea">
         <FloatingLabel label="Comments">
           <Form.Control as="textarea" placeholder="Comments" style={{ height: '80px' }} value={dataForm.comment} name="comment" onChange={handleChange} />
@@ -118,7 +119,6 @@ export default function Forms({ dataForms, setDataForms }) {
       </Form.Group>
 
       <Form.Group className='d-flex flex-row-reverse'>
-
         <Button variant="success" type="submit">
           START
         </Button>
@@ -130,7 +130,6 @@ export default function Forms({ dataForms, setDataForms }) {
         <Button variant="secondary" type="submit">
           PAUSE
         </Button>
-
       </Form.Group>
     </Form>
   );

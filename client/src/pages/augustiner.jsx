@@ -14,8 +14,7 @@ const dataForms = [
 
 export default function Augustiner() {
 
-  const [dataList, setDataList] = useState(dataForms)
-  console.log('app.js', dataList);
+  const [dataForms, setDataForms] = useState([]);
 
   return(
     <div>
@@ -25,7 +24,7 @@ export default function Augustiner() {
         <Row>
           <Col>
           {/* Form here */}
-            <Forms dataForms={dataList} setDataForms={setDataList} />
+            <Forms dataForms={dataForms} setDataForms={setDataForms} />
           </Col>
           <Col>
           {/* Timer here */}
@@ -35,7 +34,7 @@ export default function Augustiner() {
 
         <Row className="mt-5">
           {/* Table */}
-          <Tables dataForms={dataList} />
+          <Tables dataForms={dataForms} setDataForms={setDataForms} />
         </Row>
       </Container>
     </div>
