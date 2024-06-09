@@ -16,6 +16,14 @@ export default function Augustiner() {
 
   const [dataForms, setDataForms] = useState([]);
 
+
+  const [timerStart, setTimerStart] = useState(false);
+
+  const handleStartTimer = () => {
+    setTimerStart(true); // Set timerStart to true to start the timer
+  };
+
+
   return(
     <div>
       <Header />
@@ -24,11 +32,11 @@ export default function Augustiner() {
         <Row>
           <Col>
           {/* Form here */}
-            <Forms dataForms={dataForms} setDataForms={setDataForms} />
+            <Forms dataForms={dataForms} setDataForms={setDataForms} handleStartTimer={handleStartTimer} />
           </Col>
           <Col>
           {/* Timer here */}
-            <Timer text="Augustiner" />
+            <Timer text="Augustiner" start={timerStart} />
           </Col>
         </Row>
 

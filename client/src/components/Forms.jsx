@@ -4,6 +4,8 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { FloatingLabel } from 'react-bootstrap';
 
+import Timer from './Timer';
+
 // Top-Bot-Setup
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
@@ -11,7 +13,8 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 // Hooks
 import React, { useState } from 'react';
 
-export default function Forms({ dataForms, setDataForms }) {
+export default function Forms({ dataForms, setDataForms, handleStartTimer }) {
+
   const radios = [
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOTTOM' },
@@ -24,8 +27,7 @@ export default function Forms({ dataForms, setDataForms }) {
   let year = newDate.getFullYear();
 
   const showTime = newDate.getHours() 
-        + ':' + newDate.getMinutes() 
-        + ":" + newDate.getSeconds();
+        + ':' + newDate.getMinutes();
 
   const [dataForm, setForm] = useState({
     name: "",
@@ -119,7 +121,7 @@ export default function Forms({ dataForms, setDataForms }) {
       </Form.Group>
 
       <Form.Group className='d-flex flex-row-reverse'>
-        <Button variant="success" type="submit">
+        <Button variant="success" type="submit" onClick={handleStartTimer}>
           START
         </Button>
 
