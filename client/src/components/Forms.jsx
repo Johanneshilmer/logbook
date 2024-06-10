@@ -125,11 +125,11 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer }) {
           START
         </Button>
 
-        <Button variant="danger" type="submit">
+        <Button variant="danger">
           STOP
         </Button>
 
-        <Button variant="secondary" type="submit">
+        <Button variant="secondary">
           PAUSE
         </Button>
       </Form.Group>
