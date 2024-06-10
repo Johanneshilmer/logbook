@@ -3,43 +3,46 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { FloatingLabel } from 'react-bootstrap';
-
-import Timer from './Timer';
-
-// Top-Bot-Setup
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
-
-// Hooks
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue }) {
 
+  // Top, bot, setup
   const radios = [
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOTTOM' },
     { name: 'SETUP', value: 'SETUP' },
   ];
 
+  // Date
   let newDate = new Date();
   let date = newDate.getDate();
   let month = newDate.getMonth() + 1;
   let year = newDate.getFullYear();
+  // Time
+  const showTime = newDate.getHours() + ':' + newDate.getMinutes();
 
-  const showTime = newDate.getHours() 
-        + ':' + newDate.getMinutes();
-
+  // Full datatable
   const [dataForm, setForm] = useState({
     name: "",
     workOrder: "",
     program: "",
     radios: radios[0].value,
-    workTime: timerValue,
+    workTime: "00:00:00",
     solderTest: false,
     comment: "",
     date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
     time: showTime,
   });
+
+  useEffect(() => {
+    setForm(prevForm => ({
+      ...prevForm,
+      workTime: timerValue
+    }));
+  }, [timerValue]);
 
   // e == "event"
   const handleChange = e => {
@@ -50,25 +53,39 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-  
-  const handleSubmit = e => {
+
+  const handleStartSubmit = e => {
     e.preventDefault();
-    setDataForms([dataForm, ...dataForms ]);
+    handleStartTimer();
+    setDataForms([dataForm, ...dataForms]);
     // Reset the form after submission
     setForm({
       name: "",
       workOrder: "",
       program: "",
       radios: radios[0].value,
+      workTime: "00:00:00",
       solderTest: false,
       comment: "",
       date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
       time: showTime,
     });
-  }
+  };
+
+  const handleStopSubmit = e => {
+    e.preventDefault();
+    handleStopTimer();
+    // Find the last entry and update the workTime
+    const updatedDataForms = [...dataForms];
+    updatedDataForms[0] = {
+      ...updatedDataForms[0],
+      workTime: timerValue,
+    };
+    setDataForms(updatedDataForms);
+  };
 
   return (
-    <Form onSubmit={handleSubmit} method="POST">
+    <Form method="POST">
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formId">
           <FloatingLabel label="Enter Your ID">
@@ -122,15 +139,15 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
       </Form.Group>
 
       <Form.Group className='d-flex flex-row-reverse'>
-        <Button variant="success" type="submit" onClick={handleStartTimer}>
+        <Button variant="success" type="button" onClick={handleStartSubmit}>
           START
         </Button>
 
-        <Button variant="danger" type="submit" onCLick={handleStopTimer}>
+        <Button variant="danger" type="button" onClick={handleStopSubmit}>
           STOP
         </Button>
 
-        <Button variant="secondary" onClick={handlePauseTimer}>
+        <Button variant="secondary" type="button" onClick={handlePauseTimer}>
           PAUSE
         </Button>
       </Form.Group>

@@ -13,7 +13,6 @@ export default function Augustiner() {
 
   const [dataForms, setDataForms] = useState([]);
 
-
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
 
@@ -27,19 +26,12 @@ export default function Augustiner() {
 
   const handleStopTimer = () => {
     setTimerStart(false);
-    handleFormSubmit();
+    // Timer value is already updated through Timer component's onUpdate
   };
 
   const handleTimerUpdate = (newTime) => {
     setTimerValue(newTime);
   };
-
-  const handleFormSubmit = () => {
-    // Save timerValue to the table or perform any other action needed
-    // Here you can update your table dataForms state with the timerValue
-    console.log("Form Submitted with Timer Value: ", timerValue);
-  };
-
 
   return(
     <div>
