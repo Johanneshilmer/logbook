@@ -13,7 +13,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 // Hooks
 import React, { useState } from 'react';
 
-export default function Forms({ dataForms, setDataForms, handleStartTimer }) {
+export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue }) {
 
   const radios = [
     { name: 'TOP', value: 'TOP' },
@@ -34,6 +34,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer }) {
     workOrder: "",
     program: "",
     radios: radios[0].value,
+    workTime: timerValue,
     solderTest: false,
     comment: "",
     date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
@@ -125,11 +126,11 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer }) {
           START
         </Button>
 
-        <Button variant="danger">
+        <Button variant="danger" type="submit" onCLick={handleStopTimer}>
           STOP
         </Button>
 
-        <Button variant="secondary">
+        <Button variant="secondary" onClick={handlePauseTimer}>
           PAUSE
         </Button>
       </Form.Group>

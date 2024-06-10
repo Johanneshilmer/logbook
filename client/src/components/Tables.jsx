@@ -33,7 +33,7 @@ export default function Tables({ dataForms, setDataForms }) {  // Added setDataF
       <td>{items.workOrder}</td>
       <td>{items.program}</td>
       <td>{items.radios}</td>
-      <td>Worktime</td>
+      <td>{items.workTime}</td>
       <td>{items.solderTest ? "Y" : "N"}</td>
       <td>{items.name}</td>
       <td>{items.comment}</td>
