@@ -29,6 +29,14 @@ export default function Timer({ text, start, onUpdate }) {
     return () => clearInterval(id);
   }, [start]);
 
+  useEffect(() => {
+    if (!start) {
+      setCount(0);
+      setTime("00:00:00");
+      onUpdate("00:00:00");
+    }
+  }, [start]);
+
   return (
     <Container>
       <Row>

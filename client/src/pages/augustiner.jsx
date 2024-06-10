@@ -33,6 +33,10 @@ export default function Augustiner() {
     setTimerValue(newTime);
   };
 
+  const resetTimer = () => {
+    setTimerValue("00:00:00");
+  };
+
   return(
     <div>
       <Header />
@@ -48,6 +52,7 @@ export default function Augustiner() {
               handlePauseTimer={handlePauseTimer}
               handleStopTimer={handleStopTimer}
               timerValue={timerValue}
+              resetTimer={resetTimer}
             />
           </Col>
           <Col>

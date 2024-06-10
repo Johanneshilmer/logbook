@@ -7,7 +7,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import React, { useState, useEffect } from 'react';
 
-export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue }) {
+export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue, resetTimer }) {
 
   // Top, bot, setup
   const radios = [
@@ -77,11 +77,14 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     handleStopTimer();
     // Find the last entry and update the workTime
     const updatedDataForms = [...dataForms];
-    updatedDataForms[0] = {
-      ...updatedDataForms[0],
-      workTime: timerValue,
-    };
-    setDataForms(updatedDataForms);
+    if (updatedDataForms.length > 0) {
+      updatedDataForms[0] = {
+        ...updatedDataForms[0],
+        workTime: timerValue,
+      };
+      setDataForms(updatedDataForms);
+    }
+    resetTimer();  // Reset the timer
   };
 
   return (
