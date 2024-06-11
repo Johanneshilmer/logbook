@@ -4,7 +4,6 @@ import { Col, Container, Row } from 'react-bootstrap';
 export default function Timer({ text, start, onUpdate }) {
   const [count, setCount] = useState(0);
   const [time, setTime] = useState("00:00:00");
-  const [initTime, setInitTime] = useState(new Date());
 
   const showTimer = (hs) => {
     const second = Math.floor((hs / 1000) % 60).toString().padStart(2, "0");
@@ -19,7 +18,8 @@ export default function Timer({ text, start, onUpdate }) {
   useEffect(() => {
     let id;
     if (start) {
-      setInitTime(new Date() - count);
+      setCount(0);  // Reset count to 0 when starting
+      const initTime = new Date();
       id = setInterval(() => {
         const elapsedTime = new Date() - initTime;
         setCount(elapsedTime);

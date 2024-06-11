@@ -26,7 +26,8 @@ export default function Augustiner() {
 
   const handleStopTimer = () => {
     setTimerStart(false);
-    // Timer value is already updated through Timer component's onUpdate
+    // Reset the timer value after stopping
+    setTimerValue("00:00:00");
   };
 
   const handleTimerUpdate = (newTime) => {
