@@ -37,6 +37,9 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     time: showTime,
   });
 
+  // Timer state
+  const [timerStatus, setTimerStatus] = useState('stopped'); // 'stopped', 'started', 'paused'
+
   useEffect(() => {
     setForm(prevForm => ({
       ...prevForm,
@@ -57,6 +60,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
   const handleStartSubmit = e => {
     e.preventDefault();
     handleStartTimer();
+    setTimerStatus('started');
     setDataForms([dataForm, ...dataForms]);
     // Reset the form after submission
     setForm({
@@ -75,6 +79,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
   const handleStopSubmit = e => {
     e.preventDefault();
     handleStopTimer();
+    setTimerStatus('stopped');
     // Find the last entry and update the workTime
     const updatedDataForms = [...dataForms];
     if (updatedDataForms.length > 0) {
@@ -84,7 +89,13 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
       };
       setDataForms(updatedDataForms);
     }
-    resetTimer();  // Reset the timer
+    resetTimer();
+  };
+
+  const handlePauseSubmit = e => {
+    e.preventDefault();
+    handlePauseTimer();
+    setTimerStatus('paused');
   };
 
   return (
@@ -142,17 +153,23 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
       </Form.Group>
 
       <Form.Group className='d-flex flex-row-reverse'>
-        <Button variant="success" type="button" onClick={handleStartSubmit}>
-          START
-        </Button>
-
-        <Button variant="danger" type="button" onClick={handleStopSubmit}>
-          STOP
-        </Button>
-
-        <Button variant="secondary" type="button" onClick={handlePauseTimer}>
-          PAUSE
-        </Button>
+        {timerStatus === 'stopped' && (
+          <Button variant="success" type="button" onClick={handleStartSubmit}>
+            START
+          </Button>
+        )}
+        {(timerStatus === 'started' || timerStatus === 'paused') && (
+          <>
+            <Button variant="danger" type="button" onClick={handleStopSubmit}>
+              STOP
+            </Button>
+            {timerStatus === 'started' && (
+              <Button variant="secondary" type="button" onClick={handlePauseSubmit}>
+                PAUSE
+              </Button>
+            )}
+          </>
+        )}
       </Form.Group>
     </Form>
   );
