@@ -22,7 +22,8 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
   let month = newDate.getMonth() + 1;
   let year = newDate.getFullYear();
   // Time
-  const showTime = newDate.getHours() + ':' + newDate.getMinutes();
+  const minutes = newDate.getMinutes().toString().padStart(2, '0');
+  const showTime = newDate.getHours() + ':' + minutes;
 
   // Full datatable
   const [dataForm, setForm] = useState({
@@ -159,7 +160,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
           </Button>
         )}
         {(timerStatus === 'started' || timerStatus === 'paused') && (
-          <>
+          <div>
             <Button variant="danger" type="button" onClick={handleStopSubmit}>
               STOP
             </Button>
@@ -168,7 +169,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
                 PAUSE
               </Button>
             )}
-          </>
+          </div>
         )}
       </Form.Group>
     </Form>
