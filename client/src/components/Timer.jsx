@@ -18,23 +18,18 @@ export default function Timer({ text, start, onUpdate }) {
   useEffect(() => {
     let id;
     if (start) {
-      setCount(0);  // Reset count to 0 when starting
-      const initTime = new Date();
+      const initTime = Date.now() - count;  // Continue from where it left off
       id = setInterval(() => {
-        const elapsedTime = new Date() - initTime;
+        const elapsedTime = Date.now() - initTime;
         setCount(elapsedTime);
         showTimer(elapsedTime);
       }, 1000);
-    }
-    return () => clearInterval(id);
-  }, [start]);
-
-  useEffect(() => {
-    if (!start) {
+    } else {
       setCount(0);
       setTime("00:00:00");
       onUpdate("00:00:00");
     }
+    return () => clearInterval(id);
   }, [start]);
 
   return (

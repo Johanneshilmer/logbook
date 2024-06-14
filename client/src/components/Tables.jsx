@@ -1,7 +1,8 @@
 import Table from 'react-bootstrap/Table';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import EditModal from './EditModal'; // Import the EditModal component
+import axios from 'axios';
 
 export default function Tables({ dataForms, setDataForms }) {  // Added setDataForms here
   const [editingItem, setEditingItem] = useState(null);
@@ -43,6 +44,19 @@ export default function Tables({ dataForms, setDataForms }) {  // Added setDataF
       </td>
     </tr>
   ));
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('/api/forms', { params: { parent: 'augustiner' } });  // Adjust parent type as needed
+        setDataForms(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+  
+    fetchData();
+  }, []);
 
   return (
     <div>

@@ -17,6 +17,7 @@ export default function Header() {
           <Nav.Link href="/">Augustiner</Nav.Link>
           <Nav.Link href="#franziskaner">Franziskaner</Nav.Link>
           <Nav.Link href="#mackmyra">Mackmyra</Nav.Link>
+          <Nav.Link href="#search">Search</Nav.Link>
         </Nav>
       </Container>
     </Navbar>

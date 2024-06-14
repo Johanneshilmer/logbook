@@ -6,8 +6,9 @@ import { FloatingLabel } from 'react-bootstrap';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue, resetTimer }) {
+export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue, resetTimer, parent }) {
 
   // Top, bot, setup
   const radios = [
@@ -27,6 +28,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
 
   // Full datatable
   const [dataForm, setForm] = useState({
+    parent: parent,  // Set parent type
     name: "",
     workOrder: "",
     program: "",
@@ -58,23 +60,31 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     }));
   };
 
-  const handleStartSubmit = e => {
+  const handleStartSubmit = async e => {
     e.preventDefault();
     handleStartTimer();
     setTimerStatus('started');
-    setDataForms([dataForm, ...dataForms]);
-    // Reset the form after submission
-    setForm({
-      name: "",
-      workOrder: "",
-      program: "",
-      radios: radios[0].value,
-      workTime: "00:00:00",
-      solderTest: false,
-      comment: "",
-      date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
-      time: showTime,
-    });
+
+    try {
+      const response = await axios.post('/api/forms', dataForm);
+      const newDataForm = { ...dataForm, id: response.data.id };
+      setDataForms([newDataForm, ...dataForms]);
+      // Reset the form after submission
+      setForm({
+        parent: parent,
+        name: "",
+        workOrder: "",
+        program: "",
+        radios: radios[0].value,
+        workTime: "00:00:00",
+        solderTest: false,
+        comment: "",
+        date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
+        time: showTime,
+      });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
   const handleStopSubmit = e => {

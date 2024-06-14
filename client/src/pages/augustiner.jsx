@@ -10,7 +10,6 @@ import Tables from '../components/Tables'
 
 
 export default function Augustiner() {
-
   const [dataForms, setDataForms] = useState([]);
 
   const [timerStart, setTimerStart] = useState(false);
@@ -26,7 +25,6 @@ export default function Augustiner() {
 
   const handleStopTimer = () => {
     setTimerStart(false);
-    // Reset the timer value after stopping
     setTimerValue("00:00:00");
   };
 
@@ -38,18 +36,18 @@ export default function Augustiner() {
     setTimerValue("00:00:00");
   };
 
-  return(
+  return (
     <div>
       <Header />
-      
+
       <Container className="mt-4">
         <Row>
           <Col>
-          {/* Form here */}
-            <Forms 
-              dataForms={dataForms} 
-              setDataForms={setDataForms} 
-              handleStartTimer={handleStartTimer} 
+            <Forms
+              parent="augustiner"
+              dataForms={dataForms}
+              setDataForms={setDataForms}
+              handleStartTimer={handleStartTimer}
               handlePauseTimer={handlePauseTimer}
               handleStopTimer={handleStopTimer}
               timerValue={timerValue}
@@ -57,16 +55,18 @@ export default function Augustiner() {
             />
           </Col>
           <Col>
-          {/* Timer here */}
             <Timer text="Augustiner" start={timerStart} onUpdate={handleTimerUpdate} />
           </Col>
         </Row>
 
         <Row className="mt-5">
-          {/* Table */}
-          <Tables dataForms={dataForms} setDataForms={setDataForms} />
+          <Tables
+            parent="augustiner"
+            dataForms={dataForms}
+            setDataForms={setDataForms}
+          />
         </Row>
       </Container>
     </div>
-  )
-};
+  );
+}
