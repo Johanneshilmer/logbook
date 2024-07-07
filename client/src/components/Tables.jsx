@@ -1,16 +1,21 @@
 import Table from 'react-bootstrap/Table';
 import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
-import EditModal from './EditModal'; // Import the EditModal component
+import EditModal from './EditModal';
 import axios from 'axios';
 
-export default function Tables({ dataForms, setDataForms }) {  // Added setDataForms here
+export default function Tables({ dataForms, setDataForms }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const deleteHandler = id => {
-    const newList = dataForms.filter(item => item.id !== id);
-    setDataForms(newList);
+  const deleteHandler = async id => {
+    try {
+      await axios.delete(`/api/forms/${id}`);
+      const newList = dataForms.filter(item => item.id !== id);
+      setDataForms(newList);
+    } catch (error) {
+      console.error('Error deleting data:', error);
+    }
   };
 
   const startEditHandler = id => {
@@ -19,15 +24,29 @@ export default function Tables({ dataForms, setDataForms }) {  // Added setDataF
     setShowModal(true);
   };
 
-  const handleSaveEdit = updatedItem => {
-    const updatedList = dataForms.map(item =>
-      item.id === updatedItem.id ? updatedItem : item
-    );
-    setDataForms(updatedList);
-    setShowModal(false);
+  const handleSaveEdit = async (id, updatedFields) => {
+    try {
+      const existingItem = dataForms.find(item => item.id === id);
+      const updatedItem = { ...existingItem, ...updatedFields };
+
+      await axios.put(`/api/forms/${updatedItem.id}`, updatedItem);
+      const updatedList = dataForms.map(item =>
+        item.id === updatedItem.id ? updatedItem : item
+      );
+      setDataForms(updatedList);
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error updating form:', error);
+    }
   };
 
-  const tableRows = dataForms.map(items => (
+  const sortedDataForms = [...dataForms].sort((a, b) => {
+    const dateA = new Date(`${a.date}T${a.time}`);
+    const dateB = new Date(`${b.date}T${b.time}`);
+    return dateB - dateA;
+  });
+
+  const tableRows = sortedDataForms.map(items => (
     <tr key={items.id}>
       <td>{items.date}</td>
       <td>{items.time}</td>
@@ -39,9 +58,14 @@ export default function Tables({ dataForms, setDataForms }) {  // Added setDataF
       <td>{items.name}</td>
       <td>{items.comment}</td>
       <td>
-        <Button className='editbtn' variant="secondary" onClick={() => startEditHandler(items.id)}>Edit</Button>
-        <Button className='deletebtn' variant="danger" onClick={() => deleteHandler(items.id)}>Delete</Button>
+        <Button variant="warning" onClick={() => startEditHandler(items.id)}>
+          Edit
+        </Button>
+        <Button variant="danger" onClick={() => deleteHandler(items.id)}>
+          Delete
+        </Button>
       </td>
+
     </tr>
   ));
 
@@ -56,37 +80,28 @@ export default function Tables({ dataForms, setDataForms }) {  // Added setDataF
     };
   
     fetchData();
-  }, []);
+  }, [setDataForms]);
 
   return (
     <div>
-      {editingItem && (
-        <EditModal 
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          item={editingItem}
-          handleSaveEdit={handleSaveEdit}
-        />
-      )}
-      <Table striped bordered hover responsive="xl">
+      <Table responsive="md">
         <thead>
           <tr>
             <th>Date</th>
-            <th>Start Time</th>
-            <th>Order</th>
+            <th>Time</th>
+            <th>Work Order</th>
             <th>Program</th>
-            <th>TOP/BOT/SETUP</th>
+            <th>Location</th>
             <th>Work Time</th>
-            <th>ST</th>
-            <th>ID</th>
-            <th>Comment</th>
-            <th>Change</th>
+            <th>Solder</th>
+            <th>Employee</th>
+            <th>Comments</th>
+            <th>Edit</th>
           </tr>
         </thead>
-        <tbody>
-          {tableRows}
-        </tbody>
+        <tbody>{tableRows}</tbody>
       </Table>
+      <EditModal show={showModal} onHide={() => setShowModal(false)} item={editingItem} handleSaveEdit={handleSaveEdit} />
     </div>
   );
 }

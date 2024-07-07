@@ -8,27 +8,23 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue, resetTimer, parent }) {
 
-  // Top, bot, setup
+export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue, resetTimer, parent }) {
   const radios = [
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOTTOM' },
     { name: 'SETUP', value: 'SETUP' },
   ];
 
-  // Date
   let newDate = new Date();
   let date = newDate.getDate();
   let month = newDate.getMonth() + 1;
   let year = newDate.getFullYear();
-  // Time
   const minutes = newDate.getMinutes().toString().padStart(2, '0');
   const showTime = newDate.getHours() + ':' + minutes;
 
-  // Full datatable
   const [dataForm, setForm] = useState({
-    parent: parent,  // Set parent type
+    parent: parent,
     name: "",
     workOrder: "",
     program: "",
@@ -40,8 +36,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     time: showTime,
   });
 
-  // Timer state
-  const [timerStatus, setTimerStatus] = useState('stopped'); // 'stopped', 'started', 'paused'
+  const [timerStatus, setTimerStatus] = useState('stopped');
 
   useEffect(() => {
     setForm(prevForm => ({
@@ -50,7 +45,6 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     }));
   }, [timerValue]);
 
-  // e == "event"
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
 
@@ -69,7 +63,6 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
       const response = await axios.post('/api/forms', dataForm);
       const newDataForm = { ...dataForm, id: response.data.id };
       setDataForms([newDataForm, ...dataForms]);
-      // Reset the form after submission
       setForm({
         parent: parent,
         name: "",
@@ -91,7 +84,6 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     e.preventDefault();
     handleStopTimer();
     setTimerStatus('stopped');
-    // Find the last entry and update the workTime
     const updatedDataForms = [...dataForms];
     if (updatedDataForms.length > 0) {
       updatedDataForms[0] = {
@@ -131,7 +123,6 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
         </FloatingLabel>
       </Form.Group>
 
-      {/* Button  */}
       <Row>
         <Col>
           <ButtonGroup className='mt-1 mb-4'>
@@ -155,8 +146,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
           <Form.Check className='mt-2' type="switch" checked={dataForm.solderTest} id="custom-switch" label="Solderability Test" name="solderTest" onChange={handleChange} />
         </Col>
       </Row>
-      
-      {/* Comment */}
+
       <Form.Group className='mb-3' controlId="floatingTextarea">
         <FloatingLabel label="Comments">
           <Form.Control as="textarea" placeholder="Comments" style={{ height: '80px' }} value={dataForm.comment} name="comment" onChange={handleChange} />

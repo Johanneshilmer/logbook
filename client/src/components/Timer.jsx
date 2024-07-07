@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 
 export default function Timer({ text, start, onUpdate }) {
   const [count, setCount] = useState(0);
   const [time, setTime] = useState("00:00:00");
 
-  const showTimer = (hs) => {
+  const showTimer = useCallback((hs) => {
     const second = Math.floor((hs / 1000) % 60).toString().padStart(2, "0");
     const minute = Math.floor((hs / 1000 / 60) % 60).toString().padStart(2, "0");
     const hour = Math.floor(hs / 1000 / 60 / 60).toString().padStart(2, "0");
@@ -13,12 +13,12 @@ export default function Timer({ text, start, onUpdate }) {
     const formattedTime = `${hour}:${minute}:${second}`;
     setTime(formattedTime);
     onUpdate(formattedTime);
-  };
+  }, [onUpdate]);
 
   useEffect(() => {
     let id;
     if (start) {
-      const initTime = Date.now() - count;  // Continue from where it left off
+      const initTime = Date.now() - count; // Continue from where it left off
       id = setInterval(() => {
         const elapsedTime = Date.now() - initTime;
         setCount(elapsedTime);
@@ -30,7 +30,7 @@ export default function Timer({ text, start, onUpdate }) {
       onUpdate("00:00:00");
     }
     return () => clearInterval(id);
-  }, [start]);
+  }, [start, count, showTimer, onUpdate]);
 
   return (
     <Container>

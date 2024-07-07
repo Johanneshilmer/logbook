@@ -2,10 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, FloatingLabel } from 'react-bootstrap';
 
 export default function EditModal({ show, onHide, item, handleSaveEdit }) {
-  const [formData, setFormData] = useState(item);
+  const [formData, setFormData] = useState({
+    solderTest: item?.solderTest ?? false, // Ensure item is not null or undefined
+    comment: item?.comment ?? "", // Ensure item is not null or undefined
+  });
 
   useEffect(() => {
-    setFormData(item);
+    setFormData({
+      solderTest: item?.solderTest ?? false,
+      comment: item?.comment ?? "",
+    });
   }, [item]);
 
   const handleChange = e => {
@@ -18,7 +24,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    handleSaveEdit(formData);
+    handleSaveEdit(item.id, formData);
   };
 
   return (
@@ -62,3 +68,4 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
     </Modal>
   );
 }
+
