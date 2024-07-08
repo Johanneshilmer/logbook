@@ -80,20 +80,21 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     }
   };
 
-  const handleStopSubmit = e => {
-    e.preventDefault();
-    handleStopTimer();
-    setTimerStatus('stopped');
-    const updatedDataForms = [...dataForms];
-    if (updatedDataForms.length > 0) {
-      updatedDataForms[0] = {
-        ...updatedDataForms[0],
-        workTime: timerValue,
-      };
-      setDataForms(updatedDataForms);
-    }
-    resetTimer();
-  };
+
+const handleStopSubmit = e => {
+  e.preventDefault();
+  handleStopTimer();
+  setTimerStatus('stopped');
+  const updatedDataForms = [...dataForms];
+  if (updatedDataForms.length > 0) {
+    updatedDataForms[0] = {
+      ...updatedDataForms[0],
+      workTime: timerValue,
+    };
+    setDataForms(updatedDataForms);
+  }
+  resetTimer();
+};
 
   const handlePauseSubmit = e => {
     e.preventDefault();

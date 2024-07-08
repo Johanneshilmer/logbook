@@ -30,14 +30,14 @@ const SearchPage = () => {
                 <Form.Label>Query</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter search query"
+                  placeholder="Enter keyword"
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                 />
               </Form.Group>
 
               <Form.Group controlId="searchParent">
-                <Form.Label>Parent</Form.Label>
+                <Form.Label>Machine Line</Form.Label>
                 <Form.Control
                   as="select"
                   value={parent}

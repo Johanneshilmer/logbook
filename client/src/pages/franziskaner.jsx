@@ -1,18 +1,13 @@
 import { Container, Row, Col } from "react-bootstrap";
-import React, { useState } from "react";
-
-// Components
-import Header from  '../components/Header'
-import Forms from '../components/Forms'
-import Timer from '../components/Timer'
-import Tables from '../components/Tables'
-
-
+import React, { useState, useEffect } from "react";
+import Header from '../components/Header';
+import Forms from '../components/Forms';
+import Timer from '../components/Timer';
+import Tables from '../components/Tables';
+import axios from 'axios';
 
 export default function Franziskaner() {
-
   const [dataForms, setDataForms] = useState([]);
-
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
 
@@ -26,7 +21,6 @@ export default function Franziskaner() {
 
   const handleStopTimer = () => {
     setTimerStart(false);
-    // Reset the timer value after stopping
     setTimerValue("00:00:00");
   };
 
@@ -38,18 +32,30 @@ export default function Franziskaner() {
     setTimerValue("00:00:00");
   };
 
-  return(
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('/api/forms', { params: { parent: 'franziskaner' } });
+        setDataForms(response.data);
+      } catch (error) {
+        console.error('Error fetching forms:', error);
+      }
+    };
+
+    fetchData();
+  }, []); // Ensure the dependency array is empty to fetch data only once on component mount
+
+  return (
     <div>
       <Header />
-      
       <Container className="mt-4">
         <Row>
           <Col>
-          {/* Form here */}
-            <Forms 
-              dataForms={dataForms} 
-              setDataForms={setDataForms} 
-              handleStartTimer={handleStartTimer} 
+            <Forms
+              parent="franziskaner"
+              dataForms={dataForms}
+              setDataForms={setDataForms}
+              handleStartTimer={handleStartTimer}
               handlePauseTimer={handlePauseTimer}
               handleStopTimer={handleStopTimer}
               timerValue={timerValue}
@@ -57,16 +63,17 @@ export default function Franziskaner() {
             />
           </Col>
           <Col>
-          {/* Timer here */}
             <Timer text="Franziskaner" start={timerStart} onUpdate={handleTimerUpdate} />
           </Col>
         </Row>
-
         <Row className="mt-5">
-          {/* Table */}
-          <Tables dataForms={dataForms} setDataForms={setDataForms} />
+          <Tables
+            parent="franziskaner"
+            dataForms={dataForms}
+            setDataForms={setDataForms}
+          />
         </Row>
       </Container>
     </div>
-  )
-};
+  );
+}
