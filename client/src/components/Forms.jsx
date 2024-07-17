@@ -81,20 +81,42 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
   };
 
 
-  const handleStopSubmit = e => {
+  const handleStopSubmit = async (e) => {
     e.preventDefault();
-    handleStopTimer();
+    handleStopTimer(timerValue); // Pass the current timer value
     setTimerStatus('stopped');
+  
     const updatedDataForms = [...dataForms];
     if (updatedDataForms.length > 0) {
-      updatedDataForms[0] = {
+      const updatedForm = {
         ...updatedDataForms[0],
         workTime: timerValue,
       };
-      setDataForms(updatedDataForms);
+  
+      try {
+        // Update the database with the new workTime
+        const response = await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
+        console.log('Data successfully updated:', response.data);
+  
+        // Fetch the updated data from the database
+        const fetchData = async () => {
+          try {
+            const response = await axios.get('/api/forms', { params: { parent: 'augustiner' } });
+            setDataForms(response.data);
+          } catch (error) {
+            console.error('Error fetching forms:', error);
+          }
+        };
+  
+        fetchData();
+      } catch (error) {
+        console.error('Error updating the workTime:', error);
+      }
     }
+  
     resetTimer();
   };
+  
 
   const handlePauseSubmit = e => {
     e.preventDefault();
