@@ -41,8 +41,9 @@ export default function Tables({ dataForms, setDataForms }) {
   };
 
   const sortedDataForms = [...dataForms].sort((a, b) => {
-    const dateA = new Date(`${a.date}T${a.time}`);
-    const dateB = new Date(`${b.date}T${b.time}`);
+    const dateA = new Date(`${a.date.replaceAll("/","-")}T${a.time}`);
+    const dateB = new Date(`${b.date.replaceAll("/","-")}T${b.time}`);
+
     return dateB - dateA;
   });
 

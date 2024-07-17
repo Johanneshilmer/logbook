@@ -4,3 +4,5 @@ Alla buggar som ska fixas.
 2. När worktime rullar så försvinner den när man reloadar.
 3. fixa pause knappen.
 4. Gör sidan responsive.
+5. Gör så att cellerna i table ser bra ut, att det inte blir konstigt med en lång kommentar.
+6. Gör så att den senaste data hamnar högst upp.
