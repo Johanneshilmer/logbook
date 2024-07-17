@@ -81,26 +81,32 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
   };
 
 
-const handleStopSubmit = e => {
-  e.preventDefault();
-  handleStopTimer();
-  setTimerStatus('stopped');
-  const updatedDataForms = [...dataForms];
-  if (updatedDataForms.length > 0) {
-    updatedDataForms[0] = {
-      ...updatedDataForms[0],
-      workTime: timerValue,
-    };
-    setDataForms(updatedDataForms);
-  }
-  resetTimer();
-};
+  const handleStopSubmit = e => {
+    e.preventDefault();
+    handleStopTimer();
+    setTimerStatus('stopped');
+    const updatedDataForms = [...dataForms];
+    if (updatedDataForms.length > 0) {
+      updatedDataForms[0] = {
+        ...updatedDataForms[0],
+        workTime: timerValue,
+      };
+      setDataForms(updatedDataForms);
+    }
+    resetTimer();
+  };
 
   const handlePauseSubmit = e => {
     e.preventDefault();
     handlePauseTimer();
     setTimerStatus('paused');
   };
+
+  const handleResumeSubmit = e => {
+    e.preventDefault();
+    handleStartTimer();
+    setTimerStatus('started');
+  }
 
   return (
     <Form method="POST">
@@ -158,6 +164,11 @@ const handleStopSubmit = e => {
         {timerStatus === 'stopped' && (
           <Button variant="success" type="button" onClick={handleStartSubmit}>
             START
+          </Button>
+        )}
+        {timerStatus === 'paused' && (
+          <Button variant='success' type="button" onClick={handleResumeSubmit}>
+            Resume
           </Button>
         )}
         {(timerStatus === 'started' || timerStatus === 'paused') && (
