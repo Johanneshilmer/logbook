@@ -26,12 +26,12 @@ cd work-order-tracker
 2. Install backend dependencies:
 
 ```
-cd backend
+cd server
 npm install
 ```
-3. Install frontend dependencies:
+3. Install c dependencies:
 ```
-cd ../frontend
+cd ../client
 npm install
 ```
 
@@ -42,13 +42,13 @@ The project uses SQLite as the database. The database file will be created autom
 1. Start the backend server:
 
 ```
-cd backend
+cd server
 node server.js
 ```
 2. Start the frontend development server:
 
 ```
-cd ../frontend
+cd ../client
 npm start
 ```
 3. Open your browser and navigate to http://localhost:3000 to see the application in action.
