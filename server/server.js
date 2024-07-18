@@ -1,8 +1,20 @@
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const cors = require('cors');
-const app = express();
-const db = require('./database');
+const db = require('./database'); // Ensure the correct path to the database file
 const PORT = 3001;
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your frontend's origin
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true
+  }
+});
 
 app.use(cors());
 app.use(express.json());
@@ -11,7 +23,6 @@ app.get('/api/data', (req, res) => {
   res.json({ message: 'Hello from the backend!' });
 });
 
-// POST: Create a new form
 app.post('/api/forms', (req, res) => {
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
   
@@ -25,7 +36,6 @@ app.post('/api/forms', (req, res) => {
   }
 });
 
-// GET: Retrieve forms, optionally filtering by parent
 app.get('/api/forms', (req, res) => {
   const parent = req.query.parent;
   
@@ -39,7 +49,6 @@ app.get('/api/forms', (req, res) => {
   }
 });
 
-// PUT: Update a form by ID
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
@@ -54,7 +63,6 @@ app.put('/api/forms/:id', (req, res) => {
   }
 });
 
-// DELETE: Delete a form by ID
 app.delete('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   
@@ -68,7 +76,6 @@ app.delete('/api/forms/:id', (req, res) => {
   }
 });
 
-// GET: Search for forms by query and optionally by parent
 app.get('/api/search', (req, res) => {
   const { parent, query } = req.query;
   
@@ -85,6 +92,28 @@ app.get('/api/search', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+// WebSocket communication
+let timerState = {
+  formattedTime: '00:00:00'
+};
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  // Send the current timer state to the new client
+  socket.emit('timerUpdate', timerState);
+
+  socket.on('timerUpdate', ({ formattedTime }) => {
+    console.log('Timer update received:', formattedTime);
+    timerState = { formattedTime };
+    io.emit('timerUpdate', timerState); // Send the updated timer state to all clients
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
