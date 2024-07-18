@@ -4,7 +4,7 @@ import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 
 import Header from  '../components/Header'
 
-const SearchPage = () => {
+export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [parent, setParent] = useState('');
   const [results, setResults] = useState([]);
@@ -17,6 +17,27 @@ const SearchPage = () => {
       console.error('Error searching data:', error);
     }
   };
+
+  const sortedDataForms = [...results].sort((a, b) => {
+    const dateA = new Date(`${a.date.replaceAll("/","-")}T${a.time}`);
+    const dateB = new Date(`${b.date.replaceAll("/","-")}T${b.time}`);
+    return dateB - dateA;
+  });
+
+  const tableRows = sortedDataForms.map(items => (
+    <tr key={items.id}>
+      <td>{items.date}</td>
+      <td>{items.time}</td>
+      <td>{items.workOrder}</td>
+      <td>{items.program}</td>
+      <td>{items.radios}</td>
+      <td>{items.workTime}</td>
+      <td>{items.solderTest ? "Y" : "N"}</td>
+      <td>{items.name}</td>
+      <td>{items.comment}</td>
+      <td>{items.parent}</td>
+    </tr>
+  ));
 
   return (
     <div>
@@ -67,27 +88,16 @@ const SearchPage = () => {
                     <th>Start Time</th>
                     <th>Order</th>
                     <th>Program</th>
-                    <th>TOP/BOT/SETUP</th>
+                    <th>Site</th>
                     <th>Work Time</th>
                     <th>ST</th>
                     <th>ID</th>
                     <th>Comment</th>
+                    <th>Machine</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {results.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.date}</td>
-                      <td>{item.time}</td>
-                      <td>{item.workOrder}</td>
-                      <td>{item.program}</td>
-                      <td>{item.radios}</td>
-                      <td>{item.workTime}</td>
-                      <td>{item.solderTest ? "Y" : "N"}</td>
-                      <td>{item.name}</td>
-                      <td>{item.comment}</td>
-                    </tr>
-                  ))}
+                  {tableRows}
                 </tbody>
               </Table>
             ) : (
@@ -100,5 +110,3 @@ const SearchPage = () => {
 
   );
 };
-
-export default SearchPage;

@@ -85,14 +85,14 @@ export default function Tables({ dataForms, setDataForms }) {
 
   return (
     <div>
-      <Table responsive="md">
+      <Table striped bordered hover responsive="xl">
         <thead>
           <tr>
             <th>Date</th>
-            <th>Time</th>
+            <th>Start Time</th>
             <th>Work Order</th>
             <th>Program</th>
-            <th>Location</th>
+            <th>Site</th>
             <th>Work Time</th>
             <th>Solder</th>
             <th>Employee</th>
