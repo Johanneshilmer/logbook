@@ -2,14 +2,14 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const db = require('./database'); // Ensure the correct path to the database file
+const db = require('./database');
 const PORT = 3001;
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Replace with your frontend's origin
+    origin: "http://localhost:3000", 
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
     credentials: true
@@ -92,7 +92,7 @@ app.get('/api/search', (req, res) => {
   }
 });
 
-// WebSocket communication
+// WebSocket communication "Should be fine"
 let timerState = {
   formattedTime: '00:00:00'
 };
@@ -100,13 +100,13 @@ let timerState = {
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  // Send the current timer state to the new client
+  // Send the current timer state to the new user
   socket.emit('timerUpdate', timerState);
 
   socket.on('timerUpdate', ({ formattedTime }) => {
     console.log('Timer update received:', formattedTime);
     timerState = { formattedTime };
-    io.emit('timerUpdate', timerState); // Send the updated timer state to all clients
+    io.emit('timerUpdate', timerState); // Send the updated timer state to all users
   });
 
   socket.on('disconnect', () => {
