@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
+import { Container, Row, Col, Form, Table } from 'react-bootstrap';
 
 import Header from  '../components/Header'
 
@@ -9,14 +9,18 @@ export default function SearchPage() {
   const [parent, setParent] = useState('');
   const [results, setResults] = useState([]);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     try {
       const response = await axios.get('/api/search', { params: { query, parent } });
       setResults(response.data);
     } catch (error) {
       console.error('Error searching data:', error);
     }
-  };
+  }, [query, parent]);
+
+  useEffect(() => {
+    handleSearch();
+  }, [handleSearch]);
 
   const sortedDataForms = [...results].sort((a, b) => {
     const dateA = new Date(`${a.date.replaceAll("/","-")}T${a.time}`);
@@ -70,10 +74,6 @@ export default function SearchPage() {
                   <option value="franziskaner">Franziskaner</option>
                 </Form.Control>
               </Form.Group>
-
-              <Button variant="primary" className="mt-2" onClick={handleSearch}>
-                Search
-              </Button>
             </Form>
           </Col>
         </Row>
