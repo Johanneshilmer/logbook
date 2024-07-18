@@ -29,7 +29,7 @@ cd work-order-tracker
 cd server
 npm install
 ```
-3. Install c dependencies:
+3. Install frontend dependencies:
 ```
 cd ../client
 npm install
