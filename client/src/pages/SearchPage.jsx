@@ -9,6 +9,7 @@ export default function SearchPage() {
   const [parent, setParent] = useState('');
   const [results, setResults] = useState([]);
 
+  // handle query
   const handleSearch = useCallback(async () => {
     try {
       const response = await axios.get('/api/search', { params: { query, parent } });
@@ -18,10 +19,12 @@ export default function SearchPage() {
     }
   }, [query, parent]);
 
+  // load data
   useEffect(() => {
     handleSearch();
   }, [handleSearch]);
 
+  // Sorting data
   const sortedDataForms = [...results].sort((a, b) => {
     const dateA = new Date(`${a.date.replaceAll("/","-")}T${a.time}`);
     const dateB = new Date(`${b.date.replaceAll("/","-")}T${b.time}`);

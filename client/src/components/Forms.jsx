@@ -101,7 +101,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
         // Fetch the updated data from the database
         const fetchData = async () => {
           try {
-            const response = await axios.get('/api/forms', { params: { parent: 'augustiner' } });
+            const response = await axios.get('/api/forms', { params: { parent } });
             setDataForms(response.data);
           } catch (error) {
             console.error('Error fetching forms:', error);

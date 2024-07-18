@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import EditModal from './EditModal';
 import axios from 'axios';
 
-export default function Tables({ dataForms, setDataForms }) {
+export default function Tables({ dataForms, setDataForms, parent }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -40,6 +40,7 @@ export default function Tables({ dataForms, setDataForms }) {
     }
   };
 
+  // Sorting data
   const sortedDataForms = [...dataForms].sort((a, b) => {
     const dateA = new Date(`${a.date.replaceAll("/","-")}T${a.time}`);
     const dateB = new Date(`${b.date.replaceAll("/","-")}T${b.time}`);
@@ -73,7 +74,7 @@ export default function Tables({ dataForms, setDataForms }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/forms', { params: { parent: 'augustiner' } });  // Adjust parent type as needed
+        const response = await axios.get('/api/forms', { params: { parent } });  // Adjust parent
         setDataForms(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -81,7 +82,7 @@ export default function Tables({ dataForms, setDataForms }) {
     };
   
     fetchData();
-  }, [setDataForms]);
+  }, [setDataForms, parent]);
 
   return (
     <div>
