@@ -43,7 +43,7 @@ export default function Mackmyra() {
     };
 
     fetchData();
-  }, []); // Ensure the dependency array is empty to fetch data only once on component mount
+  }, []); //Fetch data once component loads
 
   return (
     <div>

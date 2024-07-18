@@ -3,8 +3,8 @@ import { Modal, Button, Form, FloatingLabel } from 'react-bootstrap';
 
 export default function EditModal({ show, onHide, item, handleSaveEdit }) {
   const [formData, setFormData] = useState({
-    solderTest: item?.solderTest ?? false, // Ensure item is not null or undefined
-    comment: item?.comment ?? "", // Ensure item is not null or undefined
+    solderTest: item?.solderTest ?? false, // make sure item is not null or undefined
+    comment: item?.comment ?? "", // make sure item is not null or undefined
   });
 
   useEffect(() => {

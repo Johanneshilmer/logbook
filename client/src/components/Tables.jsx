@@ -71,10 +71,11 @@ export default function Tables({ dataForms, setDataForms, parent }) {
     </tr>
   ));
 
+  // Load data from parent value
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/forms', { params: { parent } });  // Adjust parent
+        const response = await axios.get('/api/forms', { params: { parent } });
         setDataForms(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);

@@ -83,7 +83,7 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
 
   const handleStopSubmit = async (e) => {
     e.preventDefault();
-    handleStopTimer(timerValue); // Pass the current timer value
+    handleStopTimer(timerValue); // Pass timer value
     setTimerStatus('stopped');
   
     const updatedDataForms = [...dataForms];
@@ -94,11 +94,11 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
       };
   
       try {
-        // Update the database with the new workTime
+        // Update the database with new workTime
         const response = await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
         console.log('Data successfully updated:', response.data);
   
-        // Fetch the updated data from the database
+        // Fetch data from parent value
         const fetchData = async () => {
           try {
             const response = await axios.get('/api/forms', { params: { parent } });
