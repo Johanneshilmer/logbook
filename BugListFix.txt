@@ -4,6 +4,7 @@ Alla buggar som ska fixas.
 3. fixa pause knappen.
 4. Gör sidan responsive.
 5. Gör så att cellerna i table ser bra ut, att det inte blir konstigt med en lång kommentar.
+9. Inte kunna deleta något när tiden rullar.
 
 
 

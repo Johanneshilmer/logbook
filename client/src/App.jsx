@@ -10,7 +10,7 @@ import SearchPage from './pages/SearchPage';
 
 axios.defaults.baseURL = 'http://localhost:3001'; // Replace with your server URL
 
-function App() {
+export default function App() {
   return (
     <HashRouter>
       <Routes>
@@ -22,5 +22,3 @@ function App() {
     </HashRouter>
   );
 }
-
-export default App;
