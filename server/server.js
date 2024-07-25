@@ -97,10 +97,36 @@ io.on('connection', (socket) => {
 
   // get data "sendTime" from frontend
   socket.on('sendTime', (timeData) => {
-    console.log(timeData);
+    //console.log(timeData);
     // send data "sendbacktime" to frontend
-    socket.broadcast.emit("sendBackTime", timeData);
+    io.emit("sendBackTime", timeData);
   });
+
+
+  socket.on('timerAction', (data) => {
+    const { action } = data;
+    console.log(`Received timer action: ${action}`);
+
+    // Broadcast the status to all clients
+    switch (action) {
+      case 'start':
+        io.emit('timerStatusUpdate', { status: 'started' });
+        break;
+      case 'stop':
+        io.emit('timerStatusUpdate', { status: 'stopped' });
+        break;
+      case 'pause':
+        io.emit('timerStatusUpdate', { status: 'paused' });
+        break;
+      case 'resume':
+        io.emit('timerStatusUpdate', { status: 'started' });
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+  });
+
+
 
   socket.on('disconnect', () => {
     console.log('User disconnected id: ' + socket.id);

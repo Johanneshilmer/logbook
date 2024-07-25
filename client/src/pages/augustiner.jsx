@@ -60,6 +60,7 @@ export default function Augustiner({ socket }) {
               handleStopTimer={handleStopTimer}
               timerValue={timerValue}
               resetTimer={resetTimer}
+              socket={socket}
             />
           </Col>
           <Col>

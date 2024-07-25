@@ -7,14 +7,29 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import SocketContext from '../socket/SocketContext';
+import { useContext } from 'react';
 
 
-export default function Forms({ dataForms, setDataForms, handleStartTimer, handlePauseTimer, handleStopTimer, timerValue, resetTimer, parent }) {
+
+export default function Forms({ 
+  dataForms, 
+  setDataForms, 
+  handleStartTimer, 
+  handlePauseTimer, 
+  handleStopTimer, 
+  timerValue, 
+  resetTimer, 
+  parent,
+ }) {
   const radios = [
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOTTOM' },
     { name: 'SETUP', value: 'SETUP' },
   ];
+
+  const socket = useContext(SocketContext);
+
 
   let newDate = new Date();
   let date = newDate.getDate();
@@ -58,6 +73,9 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     e.preventDefault();
     handleStartTimer();
     setTimerStatus('started');
+    socket.emit('timerAction', { action: 'start' });
+
+
 
     try {
       const response = await axios.post('/api/forms', dataForm);
@@ -83,8 +101,9 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
 
   const handleStopSubmit = async (e) => {
     e.preventDefault();
-    handleStopTimer(timerValue); // Pass timer value
+    handleStopTimer(timerValue); // pass time value
     setTimerStatus('stopped');
+    socket.emit('timerAction', { action: 'stop' });
   
     const updatedDataForms = [...dataForms];
     if (updatedDataForms.length > 0) {
@@ -122,13 +141,25 @@ export default function Forms({ dataForms, setDataForms, handleStartTimer, handl
     e.preventDefault();
     handlePauseTimer();
     setTimerStatus('paused');
+    socket.emit('timerAction', { action: 'pause' });
   };
 
   const handleResumeSubmit = e => {
     e.preventDefault();
     handleStartTimer();
     setTimerStatus('started');
+    socket.emit('timerAction', { action: 'resume' });
   }
+
+  useEffect(() => {
+    socket.on('timerStatusUpdate', (data) => {
+      console.log(`Received timer status update: ${data.status}`);
+      setTimerStatus(data.status);
+    });
+    return () => {
+      socket.off('timerStatusUpdate');
+    };
+  }, [socket]);
 
   return (
     <Form method="POST">
