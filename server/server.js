@@ -95,8 +95,10 @@ app.get('/api/search', (req, res) => {
 io.on('connection', (socket) => {
   console.log('A user connected, id: ' + socket.id);
 
+  // get data "sendTime" from frontend
   socket.on('sendTime', (timeData) => {
     console.log(timeData);
+    // send data "sendbacktime" to frontend
     socket.broadcast.emit("sendBackTime", timeData);
   });
 
