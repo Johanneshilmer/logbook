@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 
-export default function Timer({ text, start, onUpdate }) {
+export default function Timer({ text, start, onUpdate, socket }) {
   const [count, setCount] = useState(0);
   const [time, setTime] = useState("00:00:00");
 
@@ -31,6 +31,15 @@ export default function Timer({ text, start, onUpdate }) {
     }
     return () => clearInterval(id);
   }, [start, count, showTimer, onUpdate]);
+
+  useEffect(() => {
+    socket.emit("sendTime", { time });
+
+    socket.on("sendBackTime", (timeData) => {
+      setTime(timeData.time);
+      console.log(timeData.time);
+    })
+  })
 
   return (
     <Container>

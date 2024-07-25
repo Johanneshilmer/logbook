@@ -92,25 +92,16 @@ app.get('/api/search', (req, res) => {
   }
 });
 
-// WebSocket communication "Should be fine"
-let timerState = {
-  formattedTime: '00:00:00'
-};
-
 io.on('connection', (socket) => {
-  console.log('A user connected');
+  console.log('A user connected, id: ' + socket.id);
 
-  // Send the current timer state to the new user
-  socket.emit('timerUpdate', timerState);
-
-  socket.on('timerUpdate', ({ formattedTime }) => {
-    console.log('Timer update received:', formattedTime);
-    timerState = { formattedTime };
-    io.emit('timerUpdate', timerState); // Send the updated timer state to all users
+  socket.on('sendTime', (timeData) => {
+    console.log(timeData);
+    socket.broadcast.emit("sendBackTime", timeData);
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    console.log('User disconnected id: ' + socket.id);
   });
 });
 

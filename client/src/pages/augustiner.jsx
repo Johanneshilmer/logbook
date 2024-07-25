@@ -6,7 +6,7 @@ import Timer from '../components/Timer';
 import Tables from '../components/Tables';
 import axios from 'axios';
 
-export default function Augustiner() {
+export default function Augustiner({ socket }) {
   const [dataForms, setDataForms] = useState([]);
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
@@ -63,7 +63,7 @@ export default function Augustiner() {
             />
           </Col>
           <Col>
-            <Timer text="Augustiner" start={timerStart} onUpdate={handleTimerUpdate} />
+            <Timer text="Augustiner" start={timerStart} onUpdate={handleTimerUpdate} socket={socket} />
           </Col>
         </Row>
         <Row className="mt-5">
