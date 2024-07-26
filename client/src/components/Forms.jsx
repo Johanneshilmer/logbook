@@ -93,6 +93,7 @@ export default function Forms({
         date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
         time: showTime,
       });
+      socket.emit("createForm", newDataForm);
     } catch (error) {
       console.error('Error submitting form:', error);
     }
@@ -113,26 +114,14 @@ export default function Forms({
       };
   
       try {
-        // Update the database with new workTime
-        const response = await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
-        console.log('Data successfully updated:', response.data);
-  
-        // Fetch data from parent value
-        const fetchData = async () => {
-          try {
-            const response = await axios.get('/api/forms', { params: { parent } });
-            setDataForms(response.data);
-          } catch (error) {
-            console.error('Error fetching forms:', error);
-          }
-        };
-  
-        fetchData();
+        await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
+        setDataForms(updatedDataForms.map(item => (item.id === updatedForm.id ? updatedForm : item)));
+        socket.emit('updateForm', updatedForm); // Emit updated form data
       } catch (error) {
         console.error('Error updating the workTime:', error);
       }
     }
-  
+
     resetTimer();
   };
   

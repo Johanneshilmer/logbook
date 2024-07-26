@@ -1,18 +1,24 @@
 import Table from 'react-bootstrap/Table';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Button from 'react-bootstrap/Button';
 import EditModal from './EditModal';
 import axios from 'axios';
+import SocketContext from '../socket/SocketContext';
+
 
 export default function Tables({ dataForms, setDataForms, parent }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  const socket = useContext(SocketContext);
+
 
   const deleteHandler = async id => {
     try {
       await axios.delete(`/api/forms/${id}`);
       const newList = dataForms.filter(item => item.id !== id);
       setDataForms(newList);
+      socket.emit('deleteForm', id);
     } catch (error) {
       console.error('Error deleting data:', error);
     }
@@ -35,6 +41,7 @@ export default function Tables({ dataForms, setDataForms, parent }) {
       );
       setDataForms(updatedList);
       setShowModal(false);
+      socket.emit('updateForm', updatedItem);
     } catch (error) {
       console.error('Error updating form:', error);
     }
@@ -84,6 +91,32 @@ export default function Tables({ dataForms, setDataForms, parent }) {
   
     fetchData();
   }, [setDataForms, parent]);
+
+
+  // Listen for Socket.IO events to update table data
+  useEffect(() => {
+    socket.on("newForm", (newForm) => {
+      setDataForms((prevForms) => [newForm, ...prevForms]);
+    });
+
+    socket.on("formUpdated", (updatedForm) => {
+      setDataForms((prevForms) =>
+        prevForms.map((form) => (form.id === updatedForm.id ? updatedForm : form))
+      );
+    });
+
+    socket.on("formDeleted", (deletedFormId) => {
+      setDataForms((prevForms) =>
+        prevForms.filter((form) => form.id !== deletedFormId)
+      );
+    });
+
+    return () => {
+      socket.off("newForm");
+      socket.off("formUpdated");
+      socket.off("formDeleted");
+    };
+  }, [socket, setDataForms]);
 
   return (
     <div>
