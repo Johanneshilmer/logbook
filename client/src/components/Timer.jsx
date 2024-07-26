@@ -20,7 +20,7 @@ export default function Timer({ text, start, onUpdate }) {
   useEffect(() => {
     let id;
     if (start) {
-      const initTime = Date.now() - count; // Continue from where it left off
+      const initTime = Date.now() - count; // Continue from where it left off, """not working"""
       id = setInterval(() => {
         const elapsedTime = Date.now() - initTime;
         setCount(elapsedTime);

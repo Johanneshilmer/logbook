@@ -27,7 +27,6 @@ app.post('/api/forms', (req, res) => {
     const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time);
     const newForm = { ...req.body, id: info.lastInsertRowid };
-    console.log('New form inserted:', newForm); // Debugging line
     io.emit('newForm', newForm); // Emit the new form to all clients
     res.status(201).json({ id: info.lastInsertRowid });
   } catch (error) {
@@ -36,6 +35,7 @@ app.post('/api/forms', (req, res) => {
   }
 });
 
+// get data
 app.get('/api/forms', (req, res) => {
   const parent = req.query.parent;
 
@@ -49,6 +49,7 @@ app.get('/api/forms', (req, res) => {
   }
 });
 
+// insert form
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
@@ -56,7 +57,6 @@ app.put('/api/forms/:id', (req, res) => {
   try {
     const stmt = db.prepare('UPDATE forms SET parent = ?, name = ?, workOrder = ?, program = ?, radios = ?, workTime = ?, solderTest = ?, comment = ?, date = ?, time = ? WHERE id = ?');
     stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time, id);
-    console.log('Form updated:', { id, ...req.body }); // Debugging line
     io.emit('formUpdated', { id, ...req.body }); // Emit the updated form
     res.sendStatus(200);
   } catch (error) {
@@ -65,13 +65,13 @@ app.put('/api/forms/:id', (req, res) => {
   }
 });
 
+// delete by id
 app.delete('/api/forms/:id', (req, res) => {
   const { id } = req.params;
 
   try {
     const stmt = db.prepare('DELETE FROM forms WHERE id = ?');
     stmt.run(id);
-    console.log('Form deleted:', id); // Debugging line
     io.emit('formDeleted', id); // Emit the deleted form ID
     res.sendStatus(200);
   } catch (error) {
@@ -80,6 +80,7 @@ app.delete('/api/forms/:id', (req, res) => {
   }
 });
 
+// search
 app.get('/api/search', (req, res) => {
   const { parent, query } = req.query;
 
@@ -98,18 +99,15 @@ app.get('/api/search', (req, res) => {
 
 // Socket.IO Connections
 io.on('connection', (socket) => {
-  console.log('A user connected, id: ' + socket.id);
 
   // get data "sendTime" from frontend
   socket.on('sendTime', (timeData) => {
-    console.log('Received time data:', timeData); // Debugging line
     io.emit("sendBackTime", timeData);
   });
 
   // Button update
   socket.on('timerAction', (data) => {
     const { action } = data;
-    console.log('Timer action received:', action); // Debugging line
 
     switch (action) {
       case 'start':
@@ -125,22 +123,18 @@ io.on('connection', (socket) => {
         io.emit('timerStatusUpdate', { status: 'started' });
         break;
       default:
-        console.log('Unknown action:', action);
+        console.log('error:', action);
     }
   });
 
+  // update form
   socket.on('updateForm', (formData) => {
-    console.log('Form update received from client:', formData); // Debugging line
     io.emit('formUpdated', formData);
   });
 
+  // delete formId
   socket.on('deleteForm', (formId) => {
-    console.log('Form delete received from client:', formId); // Debugging line
     io.emit('formDeleted', formId);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected id: ' + socket.id);
   });
 });
 
