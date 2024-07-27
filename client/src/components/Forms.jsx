@@ -18,7 +18,7 @@ export default function Forms({
   timerValue, 
   resetTimer, 
   parent,
- }) {
+}) {
   const radios = [
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOTTOM' },
@@ -48,7 +48,6 @@ export default function Forms({
   });
 
   const [timerStatus, setTimerStatus] = useState(() => {
-    // Retrieve the timerStatus from localStorage if it exists
     return localStorage.getItem('timerStatus') || 'stopped';
   });
 
@@ -99,7 +98,7 @@ export default function Forms({
 
   const handleStopSubmit = async (e) => {
     e.preventDefault();
-    handleStopTimer(timerValue); // pass time value
+    handleStopTimer(timerValue);
     setTimerStatus('stopped');
     localStorage.setItem('timerStatus', 'stopped');
     socket.emit('timerAction', { action: 'stop' });
@@ -209,7 +208,7 @@ export default function Forms({
         )}
         {timerStatus === 'paused' && (
           <Button variant='success' type="button" onClick={handleResumeSubmit}>
-            Resume
+            RESUME
           </Button>
         )}
         {(timerStatus === 'started' || timerStatus === 'paused') && (

@@ -6,6 +6,7 @@ export default function Timer({ text, start, onUpdate }) {
   const socket = useContext(SocketContext);
   const [count, setCount] = useState(0);
   const [time, setTime] = useState("00:00:00");
+  const [isPaused, setIsPaused] = useState(false); // New state for pause
 
   const showTimer = useCallback((hs) => {
     const second = Math.floor((hs / 1000) % 60).toString().padStart(2, "0");
@@ -19,20 +20,18 @@ export default function Timer({ text, start, onUpdate }) {
 
   useEffect(() => {
     let id;
-    if (start) {
-      const initTime = Date.now() - count; // Continue from where it left off, """not working"""
+    if (start && !isPaused) {
+      const initTime = Date.now() - count;
       id = setInterval(() => {
         const elapsedTime = Date.now() - initTime;
         setCount(elapsedTime);
         showTimer(elapsedTime);
       }, 1000);
-    } else {
-      setCount(0);
-      setTime("00:00:00");
-      onUpdate("00:00:00");
+    } else if (!start || isPaused) {
+      clearInterval(id);
     }
     return () => clearInterval(id);
-  }, [start, count, showTimer, onUpdate]);
+  }, [start, isPaused, count, showTimer]);
 
   useEffect(() => {
     socket.emit("sendTime", { time });
