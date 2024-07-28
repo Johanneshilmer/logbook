@@ -6,6 +6,7 @@ Alla buggar som ska fixas.
 9. Inte kunna deleta något när tiden rullar.
 11. Fixa så den inte dubble submitar ibland.
 12. Fixa så att flera sidor kan Stoppa/pausa/resuma.
+13. Fixa reset på timer.
 
 
 
