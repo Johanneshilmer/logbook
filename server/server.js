@@ -24,16 +24,21 @@ app.post('/api/forms', (req, res) => {
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
 
   try {
+    const existingRecord = db.prepare('SELECT id FROM forms WHERE parent = ? AND name = ? AND workOrder = ?').get(parent, name, workOrder);
+    if (existingRecord) {
+      return res.status(409).json({ error: 'Record already exists' });
+    }
     const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time);
     const newForm = { ...req.body, id: info.lastInsertRowid };
-    io.emit('newForm', newForm); // Emit the new form to all clients
+    io.emit('newForm', newForm);
     res.status(201).json({ id: info.lastInsertRowid });
   } catch (error) {
     console.error('Error inserting form:', error);
     res.status(500).json({ error: 'Failed to create form' });
   }
 });
+
 
 // get data
 app.get('/api/forms', (req, res) => {
@@ -49,7 +54,7 @@ app.get('/api/forms', (req, res) => {
   }
 });
 
-// insert form
+// Update form
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
@@ -64,6 +69,7 @@ app.put('/api/forms/:id', (req, res) => {
     res.status(500).json({ error: 'Failed to update form' });
   }
 });
+
 
 // delete by id
 app.delete('/api/forms/:id', (req, res) => {
