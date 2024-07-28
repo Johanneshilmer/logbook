@@ -1,10 +1,11 @@
 Alla buggar som ska fixas.
 
 2. localStorage för time.
-3. fixa pause knappen.
 4. Gör sidan responsive.
 5. Gör så att cellerna i table ser bra ut, att det inte blir konstigt med en lång kommentar.
 9. Inte kunna deleta något när tiden rullar.
+11. Fixa så den inte dubble submitar ibland.
+12. Fixa så att flera sidor kan Stoppa/pausa/resuma.
 
 
 
@@ -15,3 +16,4 @@ Alla buggar som ska fixas.
 7. Gör så att data kommer upp direkt när man klickar på searchpage "KLAR"
 8. Buggar när man stoppar, augustiner data kommer upp. "KLAR"
 10. fixa websocket "KLAR"
+3. fixa pause knappen. "KLAR"
