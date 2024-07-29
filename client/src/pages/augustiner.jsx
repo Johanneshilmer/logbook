@@ -28,6 +28,10 @@ export default function Augustiner({ socket }) {
     setTimerValue(newTime);
   };
 
+  const resetTimer = () => {
+    setTimerValue("00:00:00");
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -55,6 +59,7 @@ export default function Augustiner({ socket }) {
               handlePauseTimer={handlePauseTimer}
               handleStopTimer={handleStopTimer}
               timerValue={timerValue}
+              resetTimer={resetTimer}
               socket={socket}
             />
           </Col>
