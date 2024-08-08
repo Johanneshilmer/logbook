@@ -16,7 +16,6 @@ export default function Forms({
   handlePauseTimer, 
   handleStopTimer, 
   timerValue, 
-  resetTimer, 
   parent,
 }) {
   const radios = [
@@ -118,8 +117,6 @@ export default function Forms({
         console.error('Error updating the workTime:', error);
       }
     }
-
-    resetTimer();
   };
 
   const handlePauseSubmit = e => {
