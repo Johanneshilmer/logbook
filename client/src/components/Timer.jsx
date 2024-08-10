@@ -13,26 +13,23 @@ export default function Timer({ text, start, onUpdate, initialValue, parentIdent
   const socket = useContext(SocketContext);
   const [time, setTime] = useState(initialValue || "00:00:00");
   const [startTime, setStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const timerId = useRef(null);
 
   const startTimer = useCallback(() => {
     if (!startTime) return;
     timerId.current = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const formattedTime = formatTime(elapsed);
+      const currentTime = Date.now();
+      const totalElapsedTime = currentTime - startTime + elapsedTime;
+      const formattedTime = formatTime(totalElapsedTime);
       setTime(formattedTime);
       onUpdate(formattedTime);
     }, 1000);
-  }, [startTime, onUpdate]);
+  }, [startTime, elapsedTime, onUpdate]);
 
   useEffect(() => {
     if (timerRunning) {
-      if (!startTime) {
-        const now = Date.now();
-        setStartTime(now);
-        localStorage.setItem(`${parentIdentifier}_timerStartTime`, now);
-      }
       startTimer();
     } else {
       clearInterval(timerId.current);
@@ -43,20 +40,36 @@ export default function Timer({ text, start, onUpdate, initialValue, parentIdent
   }, [timerRunning, startTimer]);
 
   useEffect(() => {
-    const handleTimerStatusUpdate = ({ status, elapsedTime, parentIdentifier: id }) => {
-      if (id === parentIdentifier) {  // Only handle events relevant to this parent
+    const handleTimerStatusUpdate = ({ status, elapsedTime: newElapsedTime, parentIdentifier: id }) => {
+      if (id === parentIdentifier) {
         if (status === 'started') {
-          const start = Date.now() - elapsedTime;
-          setStartTime(start);
+          const now = Date.now();
+          setStartTime(now);
+          setElapsedTime(newElapsedTime || 0);
           setTimerRunning(true);
-          localStorage.setItem(`${parentIdentifier}_timerStartTime`, start);
+          localStorage.setItem(`${parentIdentifier}_timerStartTime`, now);
+          localStorage.setItem(`${parentIdentifier}_elapsedTime`, newElapsedTime || 0);
+        } else if (status === 'resumed') {
+          const savedElapsedTime = parseInt(localStorage.getItem(`${parentIdentifier}_elapsedTime`), 10) || 0;
+          const now = Date.now();
+          setStartTime(now);
+          setElapsedTime(savedElapsedTime); // Keep the accumulated elapsedTime
+          setTimerRunning(true);
         } else if (status === 'stopped') {
           setTimerRunning(false);
           setStartTime(null);
+          setElapsedTime(0);
           setTime("00:00:00");
           localStorage.removeItem(`${parentIdentifier}_timerStartTime`);
+          localStorage.removeItem(`${parentIdentifier}_elapsedTime`);
         } else if (status === 'paused') {
+          const currentTime = Date.now();
+          const newElapsedTime = elapsedTime + (currentTime - startTime);
+          setElapsedTime(newElapsedTime);
           setTimerRunning(false);
+          localStorage.setItem(`${parentIdentifier}_elapsedTime`, newElapsedTime);
+          clearInterval(timerId.current);
+          timerId.current = null;
         }
       }
     };
@@ -66,17 +79,24 @@ export default function Timer({ text, start, onUpdate, initialValue, parentIdent
     return () => {
       socket.off("timerStatusUpdate", handleTimerStatusUpdate);
     };
-  }, [socket, parentIdentifier]);
+  }, [socket, startTime, elapsedTime, parentIdentifier]);
 
   useEffect(() => {
     const savedStartTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
-    if (savedStartTime) {
-      const elapsed = Date.now() - parseInt(savedStartTime);
-      setStartTime(parseInt(savedStartTime));
+    const savedElapsedTime = parseInt(localStorage.getItem(`${parentIdentifier}_elapsedTime`), 10) || 0;
+
+    if (savedStartTime && start) {
+      const now = Date.now();
+      const elapsed = now - parseInt(savedStartTime, 10) + savedElapsedTime;
+      setStartTime(parseInt(savedStartTime, 10));
+      setElapsedTime(savedElapsedTime);
       setTime(formatTime(elapsed));
       setTimerRunning(true);
+    } else if (!timerRunning && savedElapsedTime) {
+      setTime(formatTime(savedElapsedTime));
+      setElapsedTime(savedElapsedTime);
     }
-  }, [parentIdentifier]);
+  }, [parentIdentifier, timerRunning, start]);
 
   return (
     <Container>
