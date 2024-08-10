@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef, useContext } from 'rea
 import { Col, Container, Row } from 'react-bootstrap';
 import SocketContext from '../socket/SocketContext';
 
-// Move the formatTime function outside the component
 const formatTime = (elapsedTime) => {
   const seconds = Math.floor((elapsedTime / 1000) % 60).toString().padStart(2, "0");
   const minutes = Math.floor((elapsedTime / 1000 / 60) % 60).toString().padStart(2, "0");
@@ -10,16 +9,15 @@ const formatTime = (elapsedTime) => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
-export default function Timer({ text, start, onUpdate, initialValue }) {
+export default function Timer({ text, start, onUpdate, initialValue, parentIdentifier }) {
   const socket = useContext(SocketContext);
-  const [time, setTime] = useState("00:00:00");
-  const [startTime, setStartTime] = useState(null);  // Store the actual start time
+  const [time, setTime] = useState(initialValue || "00:00:00");
+  const [startTime, setStartTime] = useState(null);
   const [timerRunning, setTimerRunning] = useState(false);
   const timerId = useRef(null);
 
-  // Start the timer and keep it running
   const startTimer = useCallback(() => {
-    if (!startTime) return;  // Ensure we have a start time
+    if (!startTime) return;
     timerId.current = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const formattedTime = formatTime(elapsed);
@@ -33,7 +31,7 @@ export default function Timer({ text, start, onUpdate, initialValue }) {
       if (!startTime) {
         const now = Date.now();
         setStartTime(now);
-        localStorage.setItem('timerStartTime', now);
+        localStorage.setItem(`${parentIdentifier}_timerStartTime`, now);
       }
       startTimer();
     } else {
@@ -42,22 +40,24 @@ export default function Timer({ text, start, onUpdate, initialValue }) {
     }
 
     return () => clearInterval(timerId.current);
-  }, [timerRunning, startTime, startTimer]);
+  }, [timerRunning, startTimer]);
 
   useEffect(() => {
-    const handleTimerStatusUpdate = ({ status, elapsedTime }) => {
-      if (status === 'started') {
-        const start = Date.now() - elapsedTime;
-        setStartTime(start);
-        setTimerRunning(true);
-        localStorage.setItem('timerStartTime', start);
-      } else if (status === 'stopped') {
-        setTimerRunning(false);
-        setStartTime(null);
-        setTime("00:00:00");
-        localStorage.removeItem('timerStartTime');
-      } else if (status === 'paused') {
-        setTimerRunning(false);
+    const handleTimerStatusUpdate = ({ status, elapsedTime, parentIdentifier: id }) => {
+      if (id === parentIdentifier) {  // Only handle events relevant to this parent
+        if (status === 'started') {
+          const start = Date.now() - elapsedTime;
+          setStartTime(start);
+          setTimerRunning(true);
+          localStorage.setItem(`${parentIdentifier}_timerStartTime`, start);
+        } else if (status === 'stopped') {
+          setTimerRunning(false);
+          setStartTime(null);
+          setTime("00:00:00");
+          localStorage.removeItem(`${parentIdentifier}_timerStartTime`);
+        } else if (status === 'paused') {
+          setTimerRunning(false);
+        }
       }
     };
 
@@ -66,17 +66,17 @@ export default function Timer({ text, start, onUpdate, initialValue }) {
     return () => {
       socket.off("timerStatusUpdate", handleTimerStatusUpdate);
     };
-  }, [socket]);
+  }, [socket, parentIdentifier]);
 
   useEffect(() => {
-    const savedStartTime = localStorage.getItem('timerStartTime');
+    const savedStartTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
     if (savedStartTime) {
       const elapsed = Date.now() - parseInt(savedStartTime);
       setStartTime(parseInt(savedStartTime));
       setTime(formatTime(elapsed));
       setTimerRunning(true);
     }
-  }, []);
+  }, [parentIdentifier]);
 
   return (
     <Container>

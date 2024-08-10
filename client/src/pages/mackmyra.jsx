@@ -11,31 +11,32 @@ export default function Mackmyra({ socket }) {
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
 
+  const parentIdentifier = 'mackmyra';  // Unique identifier for this parent
+
   const handleStartTimer = () => {
     setTimerStart(true);
 
-    if (!localStorage.getItem('timerStartTime')) {
-      // Store the current time as the start time if not already stored
-      localStorage.setItem('timerStartTime', Date.now().toString());
+    if (!localStorage.getItem(`${parentIdentifier}_timerStartTime`)) {
+      localStorage.setItem(`${parentIdentifier}_timerStartTime`, Date.now().toString());
     }
   };
 
   const handlePauseTimer = () => {
     setTimerStart(false);
     
-    const startTime = localStorage.getItem('timerStartTime');
+    const startTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
     if (startTime) {
       const elapsedTime = Date.now() - parseInt(startTime, 10);
-      localStorage.setItem('elapsedTime', (parseInt(localStorage.getItem('elapsedTime') || '0') + elapsedTime).toString());
-      localStorage.removeItem('timerStartTime'); // Clear the start time
+      localStorage.setItem(`${parentIdentifier}_elapsedTime`, (parseInt(localStorage.getItem(`${parentIdentifier}_elapsedTime`) || '0') + elapsedTime).toString());
+      localStorage.removeItem(`${parentIdentifier}_timerStartTime`);
     }
   };
 
   const handleStopTimer = () => {
     setTimerStart(false);
     setTimerValue("00:00:00");
-    localStorage.removeItem('timerStartTime');
-    localStorage.removeItem('elapsedTime');
+    localStorage.removeItem(`${parentIdentifier}_timerStartTime`);
+    localStorage.removeItem(`${parentIdentifier}_elapsedTime`);
   };
 
   const handleTimerUpdate = (newTime) => {
@@ -45,7 +46,7 @@ export default function Mackmyra({ socket }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/forms', { params: { parent: 'mackmyra' } });
+        const response = await axios.get('/api/forms', { params: { parent: parentIdentifier } });
         const sortedData = response.data.sort((a, b) => {
           const dateA = new Date(`${a.date} ${a.time}`);
           const dateB = new Date(`${b.date} ${b.time}`);
@@ -59,9 +60,8 @@ export default function Mackmyra({ socket }) {
 
     fetchData();
 
-    // On page reload, check if the timer was running
-    const startTime = localStorage.getItem('timerStartTime');
-    const storedElapsedTime = localStorage.getItem('elapsedTime');
+    const startTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
+    const storedElapsedTime = localStorage.getItem(`${parentIdentifier}_elapsedTime`);
 
     if (startTime) {
       const elapsedTime = Date.now() - parseInt(startTime, 10) + (parseInt(storedElapsedTime) || 0);
@@ -86,7 +86,7 @@ export default function Mackmyra({ socket }) {
         <Row>
           <Col>
             <Forms
-              parent="mackmyra"
+              parent={parentIdentifier}
               dataForms={dataForms}
               setDataForms={setDataForms}
               handleStartTimer={handleStartTimer}
@@ -98,17 +98,18 @@ export default function Mackmyra({ socket }) {
           </Col>
           <Col>
             <Timer 
-              text="mackmyra" 
+              text="Mackmyra" 
               start={timerStart} 
               onUpdate={handleTimerUpdate} 
               socket={socket} 
               initialValue={timerValue}
+              parentIdentifier={parentIdentifier}  // Pass unique identifier
             />
           </Col>
         </Row>
         <Row className="mt-5">
           <Tables
-            parent="mackmyra"
+            parent={parentIdentifier}
             dataForms={dataForms}
             setDataForms={setDataForms}
           />

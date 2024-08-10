@@ -20,6 +20,8 @@ app.use(cors());
 app.use(express.json());
 
 // API Endpoints
+
+// Create a new form
 app.post('/api/forms', (req, res) => {
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
 
@@ -35,7 +37,7 @@ app.post('/api/forms', (req, res) => {
   }
 });
 
-// Get data
+// Get forms data
 app.get('/api/forms', (req, res) => {
   const parent = req.query.parent;
 
@@ -49,7 +51,7 @@ app.get('/api/forms', (req, res) => {
   }
 });
 
-// Update form
+// Update a form
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
@@ -65,7 +67,7 @@ app.put('/api/forms/:id', (req, res) => {
   }
 });
 
-// Delete form by ID
+// Delete a form by ID
 app.delete('/api/forms/:id', (req, res) => {
   const { id } = req.params;
 
@@ -100,31 +102,31 @@ app.get('/api/search', (req, res) => {
 // Socket.IO Connections
 io.on('connection', (socket) => {
 
-  // Get time data from frontend
-  socket.on('sendTime', (timeData) => {
-    io.emit("sendBackTime", timeData);
-  });
-
   // Handle timer actions
   socket.on('timerAction', (data) => {
-    const { action, elapsedTime } = data;
+    const { action, elapsedTime, parentIdentifier } = data;
 
     switch (action) {
       case 'start':
-        io.emit('timerStatusUpdate', { status: 'started', elapsedTime });
+        io.emit('timerStatusUpdate', { status: 'started', elapsedTime, parentIdentifier });
         break;
       case 'stop':
-        io.emit('timerStatusUpdate', { status: 'stopped', elapsedTime: 0 });
+        io.emit('timerStatusUpdate', { status: 'stopped', elapsedTime: 0, parentIdentifier });
         break;
       case 'pause':
-        io.emit('timerStatusUpdate', { status: 'paused', elapsedTime });
+        io.emit('timerStatusUpdate', { status: 'paused', elapsedTime, parentIdentifier });
         break;
       case 'resume':
-        io.emit('timerStatusUpdate', { status: 'started', elapsedTime });
+        io.emit('timerStatusUpdate', { status: 'started', elapsedTime, parentIdentifier });
         break;
       default:
         console.log('Unknown timer action:', action);
     }
+  });
+
+  // Broadcast the new form to all clients
+  socket.on('createForm', (formData) => {
+    io.emit('newForm', formData);
   });
 
   // Update form
@@ -138,6 +140,7 @@ io.on('connection', (socket) => {
   });
 });
 
+// Start the server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

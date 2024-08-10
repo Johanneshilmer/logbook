@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useContext } from 'react';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
@@ -5,7 +6,6 @@ import Row from 'react-bootstrap/Row';
 import { FloatingLabel } from 'react-bootstrap';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
-import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
 
@@ -47,7 +47,7 @@ export default function Forms({
   });
 
   const [timerStatus, setTimerStatus] = useState(() => {
-    return localStorage.getItem('timerStatus') || 'stopped';
+    return localStorage.getItem(`${parent}_timerStatus`) || 'stopped';
   });
 
   useEffect(() => {
@@ -70,11 +70,8 @@ export default function Forms({
     e.preventDefault();
     handleStartTimer();
     setTimerStatus('started');
-    localStorage.setItem('timerStatus', 'started');
-    socket.emit('timerAction', { action: 'start' });
-  
-    // Broadcast the timer status to all clients
-    socket.emit('timerStatusUpdate', { running: true });
+    localStorage.setItem(`${parent}_timerStatus`, 'started');
+    socket.emit('timerAction', { action: 'start', parentIdentifier: parent });
   
     try {
       const response = await axios.post('/api/forms', dataForm);
@@ -107,11 +104,8 @@ export default function Forms({
     e.preventDefault();
     handleStopTimer(timerValue);
     setTimerStatus('stopped');
-    localStorage.setItem('timerStatus', 'stopped');
-    socket.emit('timerAction', { action: 'stop' });
-  
-    // Broadcast the timer status to all clients
-    socket.emit('timerStatusUpdate', { running: false });
+    localStorage.setItem(`${parent}_timerStatus`, 'stopped');
+    socket.emit('timerAction', { action: 'stop', parentIdentifier: parent });
   
     const updatedDataForms = [...dataForms];
     if (updatedDataForms.length > 0) {
@@ -134,31 +128,29 @@ export default function Forms({
     e.preventDefault();
     handlePauseTimer();
     setTimerStatus('paused');
-    localStorage.setItem('timerStatus', 'paused');
-    socket.emit('timerAction', { action: 'pause' });
-  
-    // Broadcast the timer status to all clients
-    socket.emit('timerStatusUpdate', { running: false });
+    localStorage.setItem(`${parent}_timerStatus`, 'paused');
+    socket.emit('timerAction', { action: 'pause', parentIdentifier: parent });
   };
   
-
   const handleResumeSubmit = e => {
     e.preventDefault();
     handleStartTimer();
     setTimerStatus('started');
-    localStorage.setItem('timerStatus', 'started');
-    socket.emit('timerAction', { action: 'resume' });
+    localStorage.setItem(`${parent}_timerStatus`, 'started');
+    socket.emit('timerAction', { action: 'resume', parentIdentifier: parent });
   }
 
   useEffect(() => {
     socket.on('timerStatusUpdate', (data) => {
-      setTimerStatus(data.status);
-      localStorage.setItem('timerStatus', data.status);
+      if (data.parentIdentifier === parent) {
+        setTimerStatus(data.status);
+        localStorage.setItem(`${parent}_timerStatus`, data.status);
+      }
     });
     return () => {
       socket.off('timerStatusUpdate');
     };
-  }, [socket]);
+  }, [socket, parent]);
 
   return (
     <Form method="POST">

@@ -24,27 +24,28 @@ export default function SearchPage() {
     handleSearch();
   }, [handleSearch]);
 
-  // Sorting data
-  const sortedDataForms = [...results].sort((a, b) => {
-    const dateA = new Date(`${a.date.replaceAll("/","-")}T${a.time}`);
-    const dateB = new Date(`${b.date.replaceAll("/","-")}T${b.time}`);
-    return dateB - dateA;
-  });
+// Sorting data
+const sortedDataForms = [...results].sort((a, b) => {
+  const dateA = new Date(`${a.date} ${a.time}`);
+  const dateB = new Date(`${b.date} ${b.time}`);
+  return dateB - dateA;
+});
 
-  const tableRows = sortedDataForms.map(items => (
-    <tr key={items.id}>
-      <td>{items.date}</td>
-      <td>{items.time}</td>
-      <td>{items.workOrder}</td>
-      <td>{items.program}</td>
-      <td>{items.radios}</td>
-      <td>{items.workTime}</td>
-      <td>{items.solderTest ? "Y" : "N"}</td>
-      <td>{items.name}</td>
-      <td>{items.comment}</td>
-      <td>{items.parent}</td>
-    </tr>
-  ));
+const tableRows = sortedDataForms.map(items => (
+  <tr key={items.id}>
+    <td>{items.date}</td>
+    <td>{items.time}</td>
+    <td>{items.workOrder}</td>
+    <td>{items.program}</td>
+    <td>{items.radios}</td>
+    <td>{items.workTime}</td>
+    <td>{items.solderTest ? "Y" : "N"}</td>
+    <td>{items.name}</td>
+    <td>{items.comment}</td>
+    <td>{items.parent}</td>
+  </tr>
+));
+
 
   return (
     <div>
