@@ -35,7 +35,7 @@ app.post('/api/forms', (req, res) => {
   }
 });
 
-// get data
+// Get data
 app.get('/api/forms', (req, res) => {
   const parent = req.query.parent;
 
@@ -49,7 +49,7 @@ app.get('/api/forms', (req, res) => {
   }
 });
 
-// insert form
+// Update form
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
@@ -65,7 +65,7 @@ app.put('/api/forms/:id', (req, res) => {
   }
 });
 
-// delete by id
+// Delete form by ID
 app.delete('/api/forms/:id', (req, res) => {
   const { id } = req.params;
 
@@ -80,7 +80,7 @@ app.delete('/api/forms/:id', (req, res) => {
   }
 });
 
-// search
+// Search functionality
 app.get('/api/search', (req, res) => {
   const { parent, query } = req.query;
 
@@ -100,39 +100,39 @@ app.get('/api/search', (req, res) => {
 // Socket.IO Connections
 io.on('connection', (socket) => {
 
-  // get data "sendTime" from frontend
+  // Get time data from frontend
   socket.on('sendTime', (timeData) => {
     io.emit("sendBackTime", timeData);
   });
 
-  // Button update
+  // Handle timer actions
   socket.on('timerAction', (data) => {
-    const { action } = data;
+    const { action, elapsedTime } = data;
 
     switch (action) {
       case 'start':
-        io.emit('timerStatusUpdate', { status: 'started' });
+        io.emit('timerStatusUpdate', { status: 'started', elapsedTime });
         break;
       case 'stop':
-        io.emit('timerStatusUpdate', { status: 'stopped' });
+        io.emit('timerStatusUpdate', { status: 'stopped', elapsedTime: 0 });
         break;
       case 'pause':
-        io.emit('timerStatusUpdate', { status: 'paused' });
+        io.emit('timerStatusUpdate', { status: 'paused', elapsedTime });
         break;
       case 'resume':
-        io.emit('timerStatusUpdate', { status: 'started' });
+        io.emit('timerStatusUpdate', { status: 'started', elapsedTime });
         break;
       default:
-        console.log('error:', action);
+        console.log('Unknown timer action:', action);
     }
   });
 
-  // update form
+  // Update form
   socket.on('updateForm', (formData) => {
     io.emit('formUpdated', formData);
   });
 
-  // delete formId
+  // Delete form by ID
   socket.on('deleteForm', (formId) => {
     io.emit('formDeleted', formId);
   });

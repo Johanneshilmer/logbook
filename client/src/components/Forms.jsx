@@ -72,11 +72,19 @@ export default function Forms({
     setTimerStatus('started');
     localStorage.setItem('timerStatus', 'started');
     socket.emit('timerAction', { action: 'start' });
-
+  
+    // Broadcast the timer status to all clients
+    socket.emit('timerStatusUpdate', { running: true });
+  
     try {
       const response = await axios.post('/api/forms', dataForm);
       const newDataForm = { ...dataForm, id: response.data.id };
-      setDataForms([newDataForm, ...dataForms]);
+      const sortedData = [newDataForm, ...dataForms].sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time}`);
+        const dateB = new Date(`${b.date} ${b.time}`);
+        return dateB - dateA;
+      });
+      setDataForms(sortedData);
       setForm({
         parent: parent,
         name: "",
@@ -94,13 +102,16 @@ export default function Forms({
       console.error('Error submitting form:', error);
     }
   };
-
+  
   const handleStopSubmit = async (e) => {
     e.preventDefault();
     handleStopTimer(timerValue);
     setTimerStatus('stopped');
     localStorage.setItem('timerStatus', 'stopped');
     socket.emit('timerAction', { action: 'stop' });
+  
+    // Broadcast the timer status to all clients
+    socket.emit('timerStatusUpdate', { running: false });
   
     const updatedDataForms = [...dataForms];
     if (updatedDataForms.length > 0) {
@@ -118,14 +129,18 @@ export default function Forms({
       }
     }
   };
-
+  
   const handlePauseSubmit = e => {
     e.preventDefault();
     handlePauseTimer();
     setTimerStatus('paused');
     localStorage.setItem('timerStatus', 'paused');
     socket.emit('timerAction', { action: 'pause' });
+  
+    // Broadcast the timer status to all clients
+    socket.emit('timerStatusUpdate', { running: false });
   };
+  
 
   const handleResumeSubmit = e => {
     e.preventDefault();
