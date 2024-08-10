@@ -3,8 +3,8 @@ import { Modal, Button, Form, FloatingLabel } from 'react-bootstrap';
 
 export default function EditModal({ show, onHide, item, handleSaveEdit }) {
   const [formData, setFormData] = useState({
-    solderTest: item?.solderTest ?? false, // make sure item is not null or undefined
-    comment: item?.comment ?? "", // make sure item is not null or undefined
+    solderTest: item?.solderTest ?? false,
+    comment: item?.comment ?? "",
   });
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
             />
           </Form.Group>
 
-          <Form.Group className='mb-3' controlId="floatingTextarea">
+          <Form.Group className="mb-3" controlId="floatingTextarea">
             <FloatingLabel label="Comments">
               <Form.Control
                 as="textarea"
@@ -58,7 +58,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
             </FloatingLabel>
           </Form.Group>
 
-          <Form.Group className='d-flex flex-row-reverse'>
+          <Form.Group className="d-flex flex-row-reverse">
             <Button variant="success" type="submit">
               Save
             </Button>
@@ -68,4 +68,3 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
     </Modal>
   );
 }
-

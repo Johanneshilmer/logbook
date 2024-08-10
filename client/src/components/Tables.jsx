@@ -1,10 +1,9 @@
+import React, { useState, useContext, useEffect } from 'react';
 import Table from 'react-bootstrap/Table';
-import React, { useState, useEffect, useContext } from 'react';
 import Button from 'react-bootstrap/Button';
 import EditModal from './EditModal';
 import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
-
 
 export default function Tables({ dataForms, setDataForms, parent }) {
   const [editingItem, setEditingItem] = useState(null);
@@ -12,132 +11,134 @@ export default function Tables({ dataForms, setDataForms, parent }) {
 
   const socket = useContext(SocketContext);
 
+  useEffect(() => {
+    socket.on('formUpdated', (updatedForm) => {
+      setDataForms((prevDataForms) => {
+        // Check if the form already exists
+        const exists = prevDataForms.some(item => item.id === updatedForm.id);
+        if (!exists) {
+          return [...prevDataForms, updatedForm];
+        }
+        // Replace the existing form with the updated one
+        return prevDataForms.map((item) =>
+          item.id === updatedForm.id ? updatedForm : item
+        );
+      });
+    });
 
-  const deleteHandler = async id => {
+    socket.on('formDeleted', (deletedFormId) => {
+      setDataForms((prevDataForms) =>
+        prevDataForms.filter((item) => item.id !== deletedFormId)
+      );
+    });
+
+    socket.on('newForm', (newForm) => {
+      setDataForms((prevDataForms) => {
+        // Validate that the form has a unique ID and is not a duplicate
+        const exists = prevDataForms.some(item => item.id === newForm.id);
+        if (exists) {
+          console.warn('Duplicate form detected:', JSON.stringify(newForm, null, 2));
+          return prevDataForms; // Avoid adding duplicate
+        }
+        return [newForm, ...prevDataForms];
+      });
+    });
+
+    return () => {
+      socket.off('formUpdated');
+      socket.off('formDeleted');
+      socket.off('newForm');
+    };
+  }, [socket, setDataForms]);
+
+  const deleteHandler = async (id) => {
     try {
       await axios.delete(`/api/forms/${id}`);
-      const newList = dataForms.filter(item => item.id !== id);
-      setDataForms(newList);
-      socket.emit('deleteForm', id);
+      setDataForms((prevDataForms) => prevDataForms.filter((item) => item.id !== id));
+      socket.emit('deleteForm', id); // Emit the delete event
     } catch (error) {
       console.error('Error deleting data:', error);
     }
   };
 
-  const startEditHandler = id => {
-    const itemToEdit = dataForms.find(item => item.id === id);
+  const startEditHandler = (id) => {
+    const itemToEdit = dataForms.find((item) => item.id === id);
     setEditingItem(itemToEdit);
     setShowModal(true);
   };
 
   const handleSaveEdit = async (id, updatedFields) => {
     try {
-      const existingItem = dataForms.find(item => item.id === id);
+      const existingItem = dataForms.find((item) => item.id === id);
       const updatedItem = { ...existingItem, ...updatedFields };
 
       await axios.put(`/api/forms/${updatedItem.id}`, updatedItem);
-      const updatedList = dataForms.map(item =>
-        item.id === updatedItem.id ? updatedItem : item
+      setDataForms((prevDataForms) =>
+        prevDataForms.map((item) => (item.id === updatedItem.id ? updatedItem : item))
       );
-      setDataForms(updatedList);
       setShowModal(false);
-      socket.emit('updateForm', updatedItem);
+      socket.emit('updateForm', updatedItem); // Emit the update event
     } catch (error) {
       console.error('Error updating form:', error);
     }
   };
 
-  // Sorting data
   const sortedDataForms = [...dataForms].sort((a, b) => {
-    const dateA = new Date(`${a.date.replaceAll("/","-")}T${a.time}`);
-    const dateB = new Date(`${b.date.replaceAll("/","-")}T${b.time}`);
-
+    const dateA = new Date(`${a.date.replaceAll("/", "-")}T${a.time}`);
+    const dateB = new Date(`${b.date.replaceAll("/", "-")}T${b.time}`);
     return dateB - dateA;
   });
 
-  const tableRows = sortedDataForms.map(items => (
-    <tr key={items.id}>
-      <td>{items.date}</td>
-      <td>{items.time}</td>
-      <td>{items.workOrder}</td>
-      <td>{items.program}</td>
-      <td>{items.radios}</td>
-      <td>{items.workTime}</td>
-      <td>{items.solderTest ? "Y" : "N"}</td>
-      <td>{items.name}</td>
-      <td>{items.comment}</td>
-      <td>
-        <Button variant="warning" onClick={() => startEditHandler(items.id)}>
-          Edit
-        </Button>
-        <Button variant="danger" onClick={() => deleteHandler(items.id)}>
-          Delete
-        </Button>
-      </td>
-
-    </tr>
-  ));
-
-  // Load data from parent value
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('/api/forms', { params: { parent } });
-        setDataForms(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-  
-    fetchData();
-  }, [setDataForms, parent]);
-
-
-  // Listen for Socket.IO events to update table data
-  useEffect(() => {
-    socket.on("newForm", (newForm) => {
-      setDataForms((prevForms) => [newForm, ...prevForms]);
-    });
-
-    socket.on("formUpdated", (updatedForm) => {
-      setDataForms((prevForms) =>
-        prevForms.map((form) => (form.id === updatedForm.id ? updatedForm : form))
-      );
-    });
-
-    socket.on("formDeleted", (deletedFormId) => {
-      setDataForms((prevForms) =>
-        prevForms.filter((form) => form.id !== deletedFormId)
-      );
-    });
-
-    return () => {
-      socket.off("newForm");
-      socket.off("formUpdated");
-      socket.off("formDeleted");
-    };
-  }, [socket, setDataForms]);
-
   return (
-    <div>
-      <Table striped bordered hover responsive="xl">
+    <>
+      <Table striped bordered hover>
         <thead>
           <tr>
             <th>Date</th>
-            <th>Start Time</th>
+            <th>Time</th>
             <th>Work Order</th>
             <th>Program</th>
-            <th>Site</th>
+            <th>Radios</th>
             <th>Work Time</th>
-            <th>Solder</th>
-            <th>Employee</th>
-            <th>Comments</th>
-            <th>Edit</th>
+            <th>Solder Test</th>
+            <th>Name</th>
+            <th>Comment</th>
+            <th>Actions</th>
           </tr>
         </thead>
-        <tbody>{tableRows}</tbody>
+        <tbody>
+          {sortedDataForms.map((items) => (
+            <tr key={items.id}>
+              <td>{items.date}</td>
+              <td>{items.time}</td>
+              <td>{items.workOrder}</td>
+              <td>{items.program}</td>
+              <td>{items.radios}</td>
+              <td>{items.workTime}</td>
+              <td>{items.solderTest ? "Y" : "N"}</td>
+              <td>{items.name}</td>
+              <td>{items.comment}</td>
+              <td>
+                <Button variant="warning" onClick={() => startEditHandler(items.id)}>
+                  Edit
+                </Button>
+                <Button variant="danger" onClick={() => deleteHandler(items.id)}>
+                  X
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </Table>
-      <EditModal show={showModal} onHide={() => setShowModal(false)} item={editingItem} handleSaveEdit={handleSaveEdit} />
-    </div>
+
+      {showModal && editingItem && (
+        <EditModal
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          item={editingItem}
+          handleSaveEdit={handleSaveEdit}
+        />
+      )}
+    </>
   );
 }
