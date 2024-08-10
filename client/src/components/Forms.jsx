@@ -215,12 +215,12 @@ export default function Forms({
             RESUME
           </Button>
         )}
-        {(timerStatus === 'started' || timerStatus === 'paused') && (
+        {(timerStatus === 'started' || timerStatus === 'paused' || timerStatus === 'resumed') && (
           <div>
             <Button variant="danger" type="button" onClick={handleStopSubmit}>
               STOP
             </Button>
-            {timerStatus === 'started' && (
+            {(timerStatus === 'started' || timerStatus === 'resumed') && (
               <Button variant="secondary" type="button" onClick={handlePauseSubmit}>
                 PAUSE
               </Button>

@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
   // Handle timer actions
   socket.on('timerAction', (data) => {
     const { action, elapsedTime, parentIdentifier } = data;
-
+  
     switch (action) {
       case 'start':
         io.emit('timerStatusUpdate', { status: 'started', elapsedTime, parentIdentifier });
@@ -117,12 +117,13 @@ io.on('connection', (socket) => {
         io.emit('timerStatusUpdate', { status: 'paused', elapsedTime, parentIdentifier });
         break;
       case 'resume':
-        io.emit('timerStatusUpdate', { status: 'started', elapsedTime, parentIdentifier });
+        io.emit('timerStatusUpdate', { status: 'resumed', elapsedTime, parentIdentifier });  // Use 'resumed' for status
         break;
       default:
         console.log('Unknown timer action:', action);
     }
   });
+  
 
   // Broadcast the new form to all clients
   socket.on('createForm', (formData) => {
