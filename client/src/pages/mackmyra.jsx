@@ -119,6 +119,7 @@ export default function Mackmyra({ socket }) {
             dataForms={dataForms}
             setDataForms={setDataForms}
             timerStatus={timerStatus}
+            parentIdentifier={parentIdentifier}
           />
         </Row>
       </Container>

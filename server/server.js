@@ -29,7 +29,7 @@ app.post('/api/forms', (req, res) => {
     const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time);
     const newForm = { ...req.body, id: info.lastInsertRowid };
-    io.emit('newForm', newForm); // Emit the new form to all clients
+    io.emit('newForm', { parent, ...newForm }); // Emit the new form with the parent identifier
     res.status(201).json({ id: info.lastInsertRowid });
   } catch (error) {
     console.error('Error inserting form:', error);
@@ -62,7 +62,7 @@ app.put('/api/forms/:id', (req, res) => {
   try {
     const stmt = db.prepare('UPDATE forms SET parent = ?, name = ?, workOrder = ?, program = ?, radios = ?, workTime = ?, solderTest = ?, comment = ?, date = ?, time = ? WHERE id = ?');
     stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time, id);
-    io.emit('formUpdated', { id, ...req.body }); // Emit the updated form
+    io.emit('formUpdated', { parent, id, ...req.body }); // Emit the updated form with the parent identifier
     res.sendStatus(200);
   } catch (error) {
     console.error('Error updating form:', error);
@@ -73,11 +73,12 @@ app.put('/api/forms/:id', (req, res) => {
 // Delete a form by ID
 app.delete('/api/forms/:id', (req, res) => {
   const { id } = req.params;
+  const parent = req.query.parent; // Assuming parent is passed as a query parameter
 
   try {
     const stmt = db.prepare('DELETE FROM forms WHERE id = ?');
     stmt.run(id);
-    io.emit('formDeleted', id); // Emit the deleted form ID
+    io.emit('formDeleted', { parent, id }); // Emit the deleted form ID with the parent identifier
     res.sendStatus(200);
   } catch (error) {
     console.error('Error deleting form:', error);

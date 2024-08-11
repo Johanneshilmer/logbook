@@ -5,7 +5,7 @@ import EditModal from './EditModal';
 import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
 
-export default function Tables({ dataForms, setDataForms, timerStatus }) {
+export default function Tables({ dataForms, setDataForms, timerStatus, parentIdentifier }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -13,35 +13,37 @@ export default function Tables({ dataForms, setDataForms, timerStatus }) {
 
   useEffect(() => {
     socket.on('formUpdated', (updatedForm) => {
-      setDataForms((prevDataForms) => {
-        // Check if the form already exists
-        const exists = prevDataForms.some(item => item.id === updatedForm.id);
-        if (!exists) {
-          return [...prevDataForms, updatedForm];
-        }
-        // Replace the existing form with the updated one
-        return prevDataForms.map((item) =>
-          item.id === updatedForm.id ? updatedForm : item
-        );
-      });
+      if (updatedForm.parent === parentIdentifier) {
+        setDataForms((prevDataForms) => {
+          const exists = prevDataForms.some(item => item.id === updatedForm.id);
+          if (!exists) {
+            return [...prevDataForms, updatedForm];
+          }
+          return prevDataForms.map((item) =>
+            item.id === updatedForm.id ? updatedForm : item
+          );
+        });
+      }
     });
 
-    socket.on('formDeleted', (deletedFormId) => {
-      setDataForms((prevDataForms) =>
-        prevDataForms.filter((item) => item.id !== deletedFormId)
-      );
+    socket.on('formDeleted', (deletedForm) => {
+      if (deletedForm.parent === parentIdentifier) {
+        setDataForms((prevDataForms) =>
+          prevDataForms.filter((item) => item.id !== deletedForm.id)
+        );
+      }
     });
 
     socket.on('newForm', (newForm) => {
-      setDataForms((prevDataForms) => {
-        // Validate that the form has a unique ID and is not a duplicate
-        const exists = prevDataForms.some(item => item.id === newForm.id);
-        if (exists) {
-          console.warn('Duplicate form detected:', JSON.stringify(newForm, null, 2));
-          return prevDataForms; // Avoid adding duplicate
-        }
-        return [newForm, ...prevDataForms];
-      });
+      if (newForm.parent === parentIdentifier) {
+        setDataForms((prevDataForms) => {
+          const exists = prevDataForms.some(item => item.id === newForm.id);
+          if (exists) {
+            return prevDataForms; // Check for adding duplicate
+          }
+          return [newForm, ...prevDataForms];
+        });
+      }
     });
 
     return () => {
@@ -49,7 +51,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus }) {
       socket.off('formDeleted');
       socket.off('newForm');
     };
-  }, [socket, setDataForms]);
+  }, [socket, setDataForms, parentIdentifier]);
 
   const deleteHandler = async (id) => {
     // Check if the timer is running or paused and if this is the first row
@@ -59,16 +61,14 @@ export default function Tables({ dataForms, setDataForms, timerStatus }) {
     }
   
     try {
-      await axios.delete(`/api/forms/${id}`);
+      await axios.delete(`/api/forms/${id}`, { params: { parent: parentIdentifier } });
       setDataForms((prevDataForms) => prevDataForms.filter((item) => item.id !== id));
-      socket.emit('deleteForm', id); // Emit the delete event
+      socket.emit('deleteForm', { parent: parentIdentifier, id }); // Emit the delete event with the parent identifier
     } catch (error) {
       console.error('Error deleting data:', error);
     }
   };
   
-  
-
   const startEditHandler = (id) => {
     const itemToEdit = dataForms.find((item) => item.id === id);
     setEditingItem(itemToEdit);
@@ -78,7 +78,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus }) {
   const handleSaveEdit = async (id, updatedFields) => {
     try {
       const existingItem = dataForms.find((item) => item.id === id);
-      const updatedItem = { ...existingItem, ...updatedFields };
+      const updatedItem = { ...existingItem, ...updatedFields, parent: parentIdentifier };
 
       await axios.put(`/api/forms/${updatedItem.id}`, updatedItem);
       setDataForms((prevDataForms) =>
