@@ -10,11 +10,13 @@ export default function Mackmyra({ socket }) {
   const [dataForms, setDataForms] = useState([]);
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
+  const [timerStatus, setTimerStatus] = useState('stopped');
 
   const parentIdentifier = 'mackmyra';  // Unique identifier for this parent
 
   const handleStartTimer = () => {
     setTimerStart(true);
+    setTimerStatus('started');
 
     if (!localStorage.getItem(`${parentIdentifier}_timerStartTime`)) {
       localStorage.setItem(`${parentIdentifier}_timerStartTime`, Date.now().toString());
@@ -23,6 +25,7 @@ export default function Mackmyra({ socket }) {
 
   const handlePauseTimer = () => {
     setTimerStart(false);
+    setTimerStatus('paused');
     
     const startTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
     if (startTime) {
@@ -34,6 +37,7 @@ export default function Mackmyra({ socket }) {
 
   const handleStopTimer = () => {
     setTimerStart(false);
+    setTimerStatus('stopped');
     setTimerValue("00:00:00");
     localStorage.removeItem(`${parentIdentifier}_timerStartTime`);
     localStorage.removeItem(`${parentIdentifier}_elapsedTime`);
@@ -67,8 +71,10 @@ export default function Mackmyra({ socket }) {
       const elapsedTime = Date.now() - parseInt(startTime, 10) + (parseInt(storedElapsedTime) || 0);
       handleTimerUpdate(formatTime(elapsedTime));
       setTimerStart(true);
+      setTimerStatus('started');
     } else if (storedElapsedTime) {
       handleTimerUpdate(formatTime(parseInt(storedElapsedTime, 10)));
+      setTimerStatus('paused');
     }
   }, []);
 
@@ -93,6 +99,7 @@ export default function Mackmyra({ socket }) {
               handlePauseTimer={handlePauseTimer}
               handleStopTimer={handleStopTimer}
               timerValue={timerValue}
+              timerStatus={timerStatus}
               socket={socket}
             />
           </Col>
@@ -103,15 +110,15 @@ export default function Mackmyra({ socket }) {
               onUpdate={handleTimerUpdate} 
               socket={socket} 
               initialValue={timerValue}
-              parentIdentifier={parentIdentifier}  // Pass unique identifier
+              parentIdentifier={parentIdentifier}
             />
           </Col>
         </Row>
         <Row className="mt-5">
           <Tables
-            parent={parentIdentifier}
             dataForms={dataForms}
             setDataForms={setDataForms}
+            timerStatus={timerStatus}
           />
         </Row>
       </Container>

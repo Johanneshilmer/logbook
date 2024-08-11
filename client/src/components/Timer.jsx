@@ -105,7 +105,7 @@ export default function Timer({ text, start, onUpdate, initialValue, parentIdent
           <h1>{text}</h1>
         </Col>
         <Col className='d-flex justify-content-center mt-5'>
-          <span>{time}</span> {/* Render the time value */}
+          <span>{time}</span>
         </Col>
       </Row>
     </Container>

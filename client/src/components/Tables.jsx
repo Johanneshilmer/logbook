@@ -5,7 +5,7 @@ import EditModal from './EditModal';
 import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
 
-export default function Tables({ dataForms, setDataForms, parent }) {
+export default function Tables({ dataForms, setDataForms, timerStatus }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -52,6 +52,12 @@ export default function Tables({ dataForms, setDataForms, parent }) {
   }, [socket, setDataForms]);
 
   const deleteHandler = async (id) => {
+    // Check if the timer is running or paused and if this is the first row
+    if ((timerStatus === 'started' || timerStatus === 'paused') && dataForms.length > 0 && dataForms[0].id === id) {
+      alert("Cannot delete the first row while the timer is running or paused.");
+      return;
+    }
+  
     try {
       await axios.delete(`/api/forms/${id}`);
       setDataForms((prevDataForms) => prevDataForms.filter((item) => item.id !== id));
@@ -60,6 +66,8 @@ export default function Tables({ dataForms, setDataForms, parent }) {
       console.error('Error deleting data:', error);
     }
   };
+  
+  
 
   const startEditHandler = (id) => {
     const itemToEdit = dataForms.find((item) => item.id === id);
@@ -77,7 +85,7 @@ export default function Tables({ dataForms, setDataForms, parent }) {
         prevDataForms.map((item) => (item.id === updatedItem.id ? updatedItem : item))
       );
       setShowModal(false);
-      socket.emit('updateForm', updatedItem); // Emit the update event
+      socket.emit('updateForm', updatedItem);
     } catch (error) {
       console.error('Error updating form:', error);
     }
@@ -107,7 +115,7 @@ export default function Tables({ dataForms, setDataForms, parent }) {
           </tr>
         </thead>
         <tbody>
-          {sortedDataForms.map((items) => (
+          {sortedDataForms.map((items, index) => (
             <tr key={items.id}>
               <td>{items.date}</td>
               <td>{items.time}</td>
@@ -122,7 +130,11 @@ export default function Tables({ dataForms, setDataForms, parent }) {
                 <Button variant="warning" onClick={() => startEditHandler(items.id)}>
                   Edit
                 </Button>
-                <Button variant="danger" onClick={() => deleteHandler(items.id)}>
+                <Button
+                  variant="danger"
+                  onClick={() => deleteHandler(items.id)}
+                  disabled={(timerStatus === 'started' || timerStatus === 'paused') && index === 0}
+                >
                   X
                 </Button>
               </td>
