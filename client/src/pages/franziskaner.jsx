@@ -120,6 +120,7 @@ export default function Franziskaner({ socket }) {
             setDataForms={setDataForms}
             timerStatus={timerStatus}
             parentIdentifier={parentIdentifier}
+            setTimerStatus={setTimerStatus}
           />
         </Row>
       </Container>

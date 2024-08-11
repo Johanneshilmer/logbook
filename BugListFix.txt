@@ -1,8 +1,7 @@
 Alla buggar som ska fixas.
 
 
-4. Gör sidan responsive.
-5. Gör så att cellerna i table ser bra ut, att det inte blir konstigt med en lång kommentar.
+
 14. Gör så att endast 6 rows syns i parent och den 7 åker bort auto.
 
 
@@ -20,3 +19,5 @@ Alla buggar som ska fixas.
 11. Fixa så den inte dubble submitar ibland. "KLAR"
 12. Fixa så att flera sidor kan Stoppa/pausa/resuma. "KLAR"
 13. Fixa reset på timer. "KLAR"
+4. Gör sidan responsive. "KLAR"
+5. Gör så att cellerna i table ser bra ut, att det inte blir konstigt med en lång kommentar. "KLAR"

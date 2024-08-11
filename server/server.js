@@ -29,7 +29,7 @@ app.post('/api/forms', (req, res) => {
     const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time);
     const newForm = { ...req.body, id: info.lastInsertRowid };
-    io.emit('newForm', { parent, ...newForm }); // Emit the new form with the parent identifier
+    io.emit('newForm', { parent, ...newForm });
     res.status(201).json({ id: info.lastInsertRowid });
   } catch (error) {
     console.error('Error inserting form:', error);
@@ -62,7 +62,8 @@ app.put('/api/forms/:id', (req, res) => {
   try {
     const stmt = db.prepare('UPDATE forms SET parent = ?, name = ?, workOrder = ?, program = ?, radios = ?, workTime = ?, solderTest = ?, comment = ?, date = ?, time = ? WHERE id = ?');
     stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time, id);
-    io.emit('formUpdated', { parent, id, ...req.body }); // Emit the updated form with the parent identifier
+    const updatedForm = { id, parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time };
+    io.emit('formUpdated', updatedForm);
     res.sendStatus(200);
   } catch (error) {
     console.error('Error updating form:', error);
@@ -73,12 +74,12 @@ app.put('/api/forms/:id', (req, res) => {
 // Delete a form by ID
 app.delete('/api/forms/:id', (req, res) => {
   const { id } = req.params;
-  const parent = req.query.parent; // Assuming parent is passed as a query parameter
+  const parent = req.query.parent;
 
   try {
     const stmt = db.prepare('DELETE FROM forms WHERE id = ?');
     stmt.run(id);
-    io.emit('formDeleted', { parent, id }); // Emit the deleted form ID with the parent identifier
+    io.emit('formDeleted', { parent, id });
     res.sendStatus(200);
   } catch (error) {
     console.error('Error deleting form:', error);
@@ -92,9 +93,9 @@ app.get('/api/search', (req, res) => {
 
   try {
     const stmt = parent
-      ? db.prepare('SELECT * FROM forms WHERE parent = ? AND (name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR comment LIKE ?)')
-      : db.prepare('SELECT * FROM forms WHERE name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR comment LIKE ?');
-    const params = parent ? [parent, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`] : [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
+      ? db.prepare('SELECT * FROM forms WHERE parent = ? AND (name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ? OR)')
+      : db.prepare('SELECT * FROM forms WHERE name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ?');
+    const params = parent ? [parent, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`] : [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
     const results = stmt.all(...params);
     res.json(results);
   } catch (error) {
@@ -121,13 +122,12 @@ io.on('connection', (socket) => {
         io.emit('timerStatusUpdate', { status: 'paused', elapsedTime, parentIdentifier });
         break;
       case 'resume':
-        io.emit('timerStatusUpdate', { status: 'resumed', elapsedTime, parentIdentifier });  // Use 'resumed' for status
+        io.emit('timerStatusUpdate', { status: 'resumed', elapsedTime, parentIdentifier });
         break;
       default:
         console.log('Unknown timer action:', action);
     }
   });
-  
 
   // Broadcast the new form to all clients
   socket.on('createForm', (formData) => {

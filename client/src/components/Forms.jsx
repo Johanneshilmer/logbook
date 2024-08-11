@@ -20,7 +20,7 @@ export default function Forms({
 }) {
   const radios = [
     { name: 'TOP', value: 'TOP' },
-    { name: 'BOTTOM', value: 'BOTTOM' },
+    { name: 'BOTTOM', value: 'BOT' },
     { name: 'SETUP', value: 'SETUP' },
   ];
 

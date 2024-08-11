@@ -111,7 +111,7 @@ export default function SearchPage() {
                       <th>Program</th>
                       <th>Site</th>
                       <th>Work Time</th>
-                      <th>ST</th>
+                      <th>Solder Test</th>
                       <th>ID</th>
                       <th className='table-comment'>Comment</th>
                       <th>Machine</th>
