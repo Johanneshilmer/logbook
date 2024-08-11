@@ -6,13 +6,13 @@ import Timer from '../components/Timer';
 import Tables from '../components/Tables';
 import axios from 'axios';
 
-export default function Mackmyra({ socket }) {
+export default function Franziskaner({ socket }) {
   const [dataForms, setDataForms] = useState([]);
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
   const [timerStatus, setTimerStatus] = useState('stopped');
 
-  const parentIdentifier = 'mackmyra';  // Unique identifier for this parent
+  const parentIdentifier = 'Franziskaner';  // Unique identifier for this parent
 
   const handleStartTimer = () => {
     setTimerStart(true);
@@ -105,7 +105,7 @@ export default function Mackmyra({ socket }) {
           </Col>
           <Col>
             <Timer 
-              text="Mackmyra" 
+              text="Franziskaner" 
               start={timerStart} 
               onUpdate={handleTimerUpdate} 
               socket={socket} 

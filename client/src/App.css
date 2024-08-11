@@ -52,3 +52,9 @@
 .editbtn {
   margin-right: 4px;
 }
+
+@media (min-width:2000px){
+  .deletebtn {
+    padding: 20px;
+  }
+}

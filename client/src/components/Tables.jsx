@@ -168,10 +168,11 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
               <td>{items.name}</td>
               <td>{items.comment}</td>
               <td>
-                <Button variant="warning" onClick={() => startEditHandler(items.id)}>
+                <Button className='editbtn' variant="warning" onClick={() => startEditHandler(items.id)}>
                   Edit
                 </Button>
                 <Button
+                  className='deletebtn'
                   variant="danger"
                   onClick={() => deleteHandler(items.id)}
                   disabled={(timerStatus === 'started' || timerStatus === 'paused') && index === 0}
