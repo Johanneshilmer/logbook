@@ -42,5 +42,13 @@
 
 /* Table */
 .table-comment {
-  width: 250px;
+  width: 280px;
+}
+
+.table-action {
+  width: 112px;
+}
+
+.editbtn {
+  margin-right: 4px;
 }
