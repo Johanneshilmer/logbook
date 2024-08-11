@@ -50,13 +50,6 @@ export default function Forms({
     return localStorage.getItem(`${parent}_timerStatus`) || 'stopped';
   });
 
-  useEffect(() => {
-    setForm(prevForm => ({
-      ...prevForm,
-      workTime: timerValue
-    }));
-  }, [timerValue]);
-
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
 
@@ -68,6 +61,19 @@ export default function Forms({
 
   const handleStartSubmit = async e => {
     e.preventDefault();
+
+      // Validation check for ID and Work Order
+    if (!dataForm.name) {
+      alert("Please enter your ID.");
+      return;
+    }
+
+    // Ensure the ID starts with the letter "t"
+    if (!dataForm.name.toLowerCase().startsWith('t')) {
+      alert("Please enter your ID.");
+      return;
+    }
+
     handleStartTimer();
     setTimerStatus('started');
     localStorage.setItem(`${parent}_timerStatus`, 'started');
