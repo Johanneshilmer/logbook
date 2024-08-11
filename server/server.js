@@ -42,7 +42,10 @@ app.get('/api/forms', (req, res) => {
   const parent = req.query.parent;
 
   try {
-    const stmt = parent ? db.prepare('SELECT * FROM forms WHERE parent = ?') : db.prepare('SELECT * FROM forms');
+    const stmt = parent 
+    ? db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 6')
+    : db.prepare('SELECT * FROM forms ORDER BY date DESC, time DESC LIMIT 6');
+
     const forms = parent ? stmt.all(parent) : stmt.all();
     res.json(forms);
   } catch (error) {
