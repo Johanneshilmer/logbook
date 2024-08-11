@@ -1,12 +1,46 @@
-h1{
+/* SearchPage */
+.custom-pagination .page-item .page-link {
+  font-size: 1.2rem;
+  padding: 0.5px 10px;
+  color: white;
+  background-color: #212529;
+}
+
+.custom-pagination .page-item {
+  margin: 0 2px;
+}
+
+.page-item.active .page-link{
+  background-color: white;
+  color: #212529;
+  border-style: solid;
+  border-radius: 2px;
+  border-color: #212529;
+}
+
+.form-label {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.form-control{
+  border: blue;
+  background-color: aqua;
+}
+
+/* Timer */
+
+.page-title {
   text-decoration: underline;
 }
 
-.editbtn {
-  margin-right: 6px;
-}
-
-span {
+.timer {
   font-size: 4rem;
   font-weight: 500;
+}
+
+
+/* Table */
+.table-comment {
+  width: 250px;
 }

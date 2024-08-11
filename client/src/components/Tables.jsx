@@ -110,7 +110,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus }) {
             <th>Work Time</th>
             <th>Solder Test</th>
             <th>Name</th>
-            <th>Comment</th>
+            <th className='table-comment'>Comment</th>
             <th>Actions</th>
           </tr>
         </thead>

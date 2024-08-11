@@ -9,14 +9,14 @@ export default function SearchPage() {
   const [parent, setParent] = useState('');
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage] = useState(50); // Max 50 rows per page
+  const [rowsPerPage] = useState(50);
 
-  // handle query
+
   const handleSearch = useCallback(async () => {
     try {
       const response = await axios.get('/api/search', { params: { query, parent } });
       setResults(response.data);
-      setCurrentPage(1); // Reset to the first page whenever a new search is performed
+      setCurrentPage(1);
     } catch (error) {
       console.error('Error searching data:', error);
     }
@@ -27,7 +27,7 @@ export default function SearchPage() {
     handleSearch();
   }, [handleSearch]);
 
-  // Sorting data
+
   const sortedDataForms = [...results].sort((a, b) => {
     const dateA = new Date(`${a.date} ${a.time}`);
     const dateB = new Date(`${b.date} ${b.time}`);
@@ -77,7 +77,6 @@ export default function SearchPage() {
             <h2>Search</h2>
             <Form>
               <Form.Group controlId="searchQuery">
-                <Form.Label>Query</Form.Label>
                 <Form.Control
                   type="text"
                   placeholder="Enter keyword"
@@ -87,7 +86,7 @@ export default function SearchPage() {
               </Form.Group>
 
               <Form.Group controlId="searchParent">
-                <Form.Label>Machine Line</Form.Label>
+                <Form.Label className='machine-line'>Machine Line</Form.Label>
                 <Form.Control as="select" value={parent} onChange={(e) => setParent(e.target.value)}>
                   <option value="">All</option>
                   <option value="augustiner">Augustiner</option>
@@ -114,15 +113,15 @@ export default function SearchPage() {
                       <th>Work Time</th>
                       <th>ST</th>
                       <th>ID</th>
-                      <th>Comment</th>
+                      <th className='table-comment'>Comment</th>
                       <th>Machine</th>
                     </tr>
                   </thead>
                   <tbody>{tableRows}</tbody>
                 </Table>
-                <Pagination className="justify-content-center">
+                <Pagination className="justify-content-center custom-pagination">
                   <Pagination.First onClick={() => handlePageChange(1)} />
-                  <Pagination.Prev
+                  <Pagination.Prev 
                     onClick={() => handlePageChange(currentPage > 1 ? currentPage - 1 : 1)}
                   />
                   {paginationItems}

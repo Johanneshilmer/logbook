@@ -102,10 +102,10 @@ export default function Timer({ text, start, onUpdate, initialValue, parentIdent
     <Container>
       <Row>
         <Col sm={12} className='mb-5'>
-          <h1>{text}</h1>
+          <h1 className='page-title'>{text}</h1>
         </Col>
         <Col className='d-flex justify-content-center mt-5'>
-          <span>{time}</span>
+          <span className='timer'>{time}</span>
         </Col>
       </Row>
     </Container>
