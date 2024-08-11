@@ -89,9 +89,9 @@ export default function SearchPage() {
                 <Form.Label className='machine-line'>Machine Line</Form.Label>
                 <Form.Control as="select" value={parent} onChange={(e) => setParent(e.target.value)}>
                   <option value="">All</option>
-                  <option value="augustiner">Augustiner</option>
-                  <option value="mackmyra">Mackmyra</option>
-                  <option value="franziskaner">Franziskaner</option>
+                  <option value="Augustiner">Augustiner</option>
+                  <option value="Franziskaner">Franziskaner</option>
+                  <option value="Mackmyra">Mackmyra</option>
                 </Form.Control>
               </Form.Group>
             </Form>

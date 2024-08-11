@@ -9,7 +9,9 @@ import Franziskaner from './pages/Franziskaner';
 import Mackmyra from './pages/Mackmyra';
 import SearchPage from './pages/SearchPage';
 
-axios.defaults.baseURL = 'http://localhost:3001'; // Replace with your server URL
+//.env
+const environment = process.env.REACT_APP_SERVER;
+axios.defaults.baseURL = environment;
 
 export default function App() {
   return (
