@@ -50,7 +50,7 @@ export default function SearchPage() {
       <td>{items.workTime}</td>
       <td>{items.solderTest ? 'Y' : 'N'}</td>
       <td>{items.name}</td>
-      <td>{items.comment}</td>
+      <td className='table-comment'>{items.comment}</td>
       <td>{items.parent}</td>
     </tr>
   ));
@@ -101,8 +101,8 @@ export default function SearchPage() {
           <Col>
             <h3>Results</h3>
             {results.length > 0 ? (
-              <>
-                <Table striped bordered hover responsive="xl">
+              <div className='table-responsive'>
+                <Table striped bordered hover className='custom-table'>
                   <thead>
                     <tr>
                       <th>Date</th>
@@ -113,7 +113,7 @@ export default function SearchPage() {
                       <th>Work Time</th>
                       <th>Solder Test</th>
                       <th>ID</th>
-                      <th className='table-comment'>Comment</th>
+                      <th>Comment</th>
                       <th>Machine</th>
                     </tr>
                   </thead>
@@ -130,7 +130,7 @@ export default function SearchPage() {
                   />
                   <Pagination.Last onClick={() => handlePageChange(totalPages)} />
                 </Pagination>
-              </>
+              </div>
             ) : (
               <p>No results found</p>
             )}

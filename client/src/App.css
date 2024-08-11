@@ -41,20 +41,54 @@
 
 
 /* Table */
-.table-comment {
-  width: 280px;
-}
 
 .table-action {
   width: 112px;
 }
 
-.editbtn {
-  margin-right: 4px;
+.custom-table th,
+.custom-table td {
+    text-align: center;
+    vertical-align: middle;
 }
 
-@media (min-width:2000px){
-  .deletebtn {
-    padding: 20px;
-  }
+.custom-table .table-comment {
+  width: 280px;
+  text-align: left;
+  padding-left: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Media query for screens smaller than 1200px */
+@media (max-width: 1200px) {
+    .custom-table {
+        font-size: 0.9rem;
+    }
+    
+    .custom-table th,
+    .custom-table td {
+        padding: 8px;
+    }
+
+    .table-responsive {
+        overflow-x: auto; /* Ensure horizontal scrolling */
+    }
+
+        .custom-table .btn {
+          padding: 4px 8px;
+          font-size: 0.8rem;
+      }
+      
+      .custom-table .editbtn {
+          padding: 4px 8px;
+      }
+  
+      .custom-table .deletebtn {
+          padding: 4px 8px;
+      }
 }

@@ -139,8 +139,8 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
   const displayedDataForms = sortedDataForms.slice(0, 6);
 
   return (
-    <>
-      <Table striped bordered hover>
+    <div className="table-responsive">
+      <Table striped bordered hover className="custom-table">
         <thead>
           <tr>
             <th>Date</th>
@@ -151,7 +151,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
             <th>Work Time</th>
             <th>Solder Test</th>
             <th>Name</th>
-            <th className='table-comment'>Comment</th>
+            <th>Comment</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -166,19 +166,21 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
               <td>{items.workTime}</td>
               <td>{items.solderTest ? "Y" : "N"}</td>
               <td>{items.name}</td>
-              <td>{items.comment}</td>
+              <td className='table-comment'>{items.comment}</td>
               <td>
-                <Button className='editbtn' variant="warning" onClick={() => startEditHandler(items.id)}>
-                  Edit
-                </Button>
-                <Button
-                  className='deletebtn'
-                  variant="danger"
-                  onClick={() => deleteHandler(items.id)}
-                  disabled={(timerStatus === 'started' || timerStatus === 'paused') && index === 0}
-                >
-                  X
-                </Button>
+                <div className='action-buttons'>
+                  <Button className='editbtn' variant="warning" onClick={() => startEditHandler(items.id)}>
+                    Edit
+                  </Button>
+                  <Button
+                    className='deletebtn'
+                    variant="danger"
+                    onClick={() => deleteHandler(items.id)}
+                    disabled={(timerStatus === 'started' || timerStatus === 'paused') && index === 0}
+                  >
+                    X
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}
@@ -193,6 +195,6 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
           handleSaveEdit={handleSaveEdit}
         />
       )}
-    </>
+    </div>
   );
 }
