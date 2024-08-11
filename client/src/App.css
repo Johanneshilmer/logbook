@@ -1,4 +1,4 @@
-/* SearchPage */
+/*--------------------------------------------------- SearchPage */
 .custom-pagination .page-item .page-link {
   font-size: 1.2rem;
   padding: 0.5px 10px;
@@ -28,7 +28,7 @@
   background-color: aqua;
 }
 
-/* Timer */
+/* ------------------------------------------------Timer */
 
 .page-title {
   text-decoration: underline;
@@ -40,7 +40,7 @@
 }
 
 
-/* Table */
+/* ------------------------------------------------Table */
 
 .table-action {
   width: 112px;

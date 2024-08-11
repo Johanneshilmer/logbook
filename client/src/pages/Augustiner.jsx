@@ -85,6 +85,9 @@ export default function Augustiner({ socket }) {
     return `${hours}:${minutes}:${seconds}`;
   };
 
+  const toggleButton = 'outline-primary';
+  const editButton = 'primary';
+
   return (
     <div>
       <Header />
@@ -92,6 +95,8 @@ export default function Augustiner({ socket }) {
         <Row>
           <Col>
             <Forms
+              editColor={editButton}
+              toggleColor={toggleButton}
               parent={parentIdentifier}
               dataForms={dataForms}
               setDataForms={setDataForms}
@@ -116,6 +121,7 @@ export default function Augustiner({ socket }) {
         </Row>
         <Row className="mt-5">
           <Tables
+            editColor={editButton}
             dataForms={dataForms}
             setDataForms={setDataForms}
             timerStatus={timerStatus}

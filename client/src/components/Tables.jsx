@@ -5,7 +5,7 @@ import EditModal from './EditModal';
 import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
 
-export default function Tables({ dataForms, setDataForms, timerStatus, setTimerStatus, parentIdentifier }) {
+export default function Tables({ dataForms, setDataForms, timerStatus, setTimerStatus, parentIdentifier, editColor }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -169,7 +169,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
               <td className='table-comment'>{items.comment}</td>
               <td>
                 <div className='action-buttons'>
-                  <Button className='editbtn' variant="warning" onClick={() => startEditHandler(items.id)}>
+                  <Button className='editbtn' variant={editColor} onClick={() => startEditHandler(items.id)}>
                     Edit
                   </Button>
                   <Button

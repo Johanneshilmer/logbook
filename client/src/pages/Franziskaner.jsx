@@ -85,6 +85,9 @@ export default function Franziskaner({ socket }) {
     return `${hours}:${minutes}:${seconds}`;
   };
 
+  const toggleButton = 'outline-success';
+  const editButton = 'success';
+
   return (
     <div>
       <Header />
@@ -92,6 +95,8 @@ export default function Franziskaner({ socket }) {
         <Row>
           <Col>
             <Forms
+              editColor={editButton}
+              toggleColor={toggleButton}
               parent={parentIdentifier}
               dataForms={dataForms}
               setDataForms={setDataForms}
@@ -116,6 +121,7 @@ export default function Franziskaner({ socket }) {
         </Row>
         <Row className="mt-5">
           <Tables
+            editColor={editButton}
             dataForms={dataForms}
             setDataForms={setDataForms}
             timerStatus={timerStatus}

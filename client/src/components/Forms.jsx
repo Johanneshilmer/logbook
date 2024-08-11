@@ -17,6 +17,8 @@ export default function Forms({
   handleStopTimer, 
   timerValue, 
   parent,
+  toggleColor,
+  editColor
 }) {
   const radios = [
     { name: 'TOP', value: 'TOP' },
@@ -188,7 +190,7 @@ export default function Forms({
                 key={radio.value}
                 id={`radio-${idx}`}
                 type="radio"
-                variant={idx % 2 ? 'outline-success' : 'outline-danger'}
+                variant={toggleColor}
                 name="radios"
                 value={radio.value}
                 checked={dataForm.radios === radio.value}
@@ -212,7 +214,7 @@ export default function Forms({
 
       <Form.Group className='d-flex flex-row-reverse'>
         {timerStatus === 'stopped' && (
-          <Button variant="success" type="button" onClick={handleStartSubmit}>
+          <Button variant={editColor} type="button" onClick={handleStartSubmit}>
             START
           </Button>
         )}
