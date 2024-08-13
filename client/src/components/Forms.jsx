@@ -202,7 +202,16 @@ export default function Forms({
           </ButtonGroup>
         </Col>
         <Col>
-          <Form.Check className='mt-2' type="switch" checked={dataForm.solderTest} id="custom-switch" label="Solderability Test" name="solderTest" onChange={handleChange} />
+          <Form.Check
+            className='mt-2' 
+            type="switch" 
+            checked={dataForm.solderTest} 
+            id="custom-switch" 
+            label="Solderability Test" 
+            name="solderTest" 
+            onChange={handleChange} 
+            
+          />
         </Col>
       </Row>
 

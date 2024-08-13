@@ -2,31 +2,35 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Form, Table } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import Header from '../components/Header';
 
 export default function SearchPage() {
+  const today = new Date();
   const [query, setQuery] = useState('');
   const [parent, setParent] = useState('');
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(50);
 
-
   const handleSearch = useCallback(async () => {
     try {
-      const response = await axios.get('/api/search', { params: { query, parent } });
+      const response = await axios.get('/api/search', {
+        params: { query, parent, startDate, endDate }
+      });
       setResults(response.data);
       setCurrentPage(1);
     } catch (error) {
       console.error('Error searching data:', error);
     }
-  }, [query, parent]);
+  }, [query, parent, startDate, endDate]);
 
-  // load data
   useEffect(() => {
     handleSearch();
   }, [handleSearch]);
-
 
   const sortedDataForms = [...results].sort((a, b) => {
     const dateA = new Date(`${a.date} ${a.time}`);
@@ -34,7 +38,6 @@ export default function SearchPage() {
     return dateB - dateA;
   });
 
-  // Pagination logic
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = sortedDataForms.slice(indexOfFirstRow, indexOfLastRow);
@@ -84,22 +87,48 @@ export default function SearchPage() {
                   onChange={(e) => setQuery(e.target.value)}
                 />
               </Form.Group>
-
+              
               <Form.Group controlId="searchParent">
-                <Form.Label className='machine-line'>Machine Line</Form.Label>
-                <Form.Control as="select" value={parent} onChange={(e) => setParent(e.target.value)}>
-                  <option value="">All</option>
-                  <option value="Augustiner">Augustiner</option>
-                  <option value="Franziskaner">Franziskaner</option>
-                  <option value="Mackmyra">Mackmyra</option>
-                </Form.Control>
+                <Row md={5}>
+                  <Col>
+                    <Form.Label>Machine Line</Form.Label>
+                    <Form.Select as="select" value={parent} onChange={(e) => setParent(e.target.value)}>
+                      <option value="">All</option>
+                      <option value="Augustiner">Augustiner</option>
+                      <option value="Franziskaner">Franziskaner</option>
+                      <option value="Mackmyra">Mackmyra</option>
+                    </Form.Select>
+                  </Col>
+                  <Col>
+                    <Form.Label className='d-flex'>Start Date</Form.Label>
+                    <DatePicker
+                      selected={startDate}
+                      onChange={(date) => setStartDate(date)}
+                      className="form-control"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                  </Col>
+                  <Col className='date-col'>
+                    <Form.Label className='d-flex'>End Date</Form.Label>
+                    <DatePicker
+                      selected={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      className="form-control"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                  </Col>
+                </Row>
               </Form.Group>
+              
             </Form>
           </Col>
         </Row>
         <Row className="mt-4">
           <Col>
-            <h3>Results</h3>
+            <h3>
+              Results <span>: <strong>{sortedDataForms.length}</strong> {sortedDataForms.length > 1 ? 'Changeovers' : 'Changeover'}</span>
+
+            </h3>
             {results.length > 0 ? (
               <div className='table-responsive'>
                 <Table striped bordered hover className='custom-table'>
@@ -121,7 +150,7 @@ export default function SearchPage() {
                 </Table>
                 <Pagination className="justify-content-center custom-pagination">
                   <Pagination.First onClick={() => handlePageChange(1)} />
-                  <Pagination.Prev 
+                  <Pagination.Prev
                     onClick={() => handlePageChange(currentPage > 1 ? currentPage - 1 : 1)}
                   />
                   {paginationItems}

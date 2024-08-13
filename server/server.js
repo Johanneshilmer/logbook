@@ -90,16 +90,57 @@ app.delete('/api/forms/:id', (req, res) => {
   }
 });
 
-// Search functionality
+
+// Search functionality with correct date and time handling
 app.get('/api/search', (req, res) => {
-  const { parent, query } = req.query;
+  const { parent, query, startDate, endDate } = req.query;
+
+  let baseQuery = 'SELECT * FROM forms WHERE (name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ?)';
+  let params = [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
+
+  if (parent) {
+    baseQuery += ' AND parent = ?';
+    params.push(parent);
+  }
+
+  // Function to convert date to the correct format (yyyy/mm/dd) and adjust to start or end of the day
+  const convertDateForSQL = (dateString, isEndDate = false) => {
+    let date = new Date(dateString);
+
+    if (isEndDate) {
+      // end of the day
+      date.setHours(23, 59, 59, 999);
+    } else {
+      // start of the day
+      date.setHours(0, 0, 0, 0);
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed in JS
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}/${month}/${day}`;
+  };
+
+  if (startDate && endDate) {
+    const startDateFormatted = convertDateForSQL(startDate); // Convert startDate yyyy/mm/dd starting at 00:00:00
+    const endDateFormatted = convertDateForSQL(endDate, true); // Convert endDate yyyy/mm/dd ending at 23:59:59
+    baseQuery += ' AND date BETWEEN ? AND ?';
+    params.push(startDateFormatted, endDateFormatted);
+  } else if (startDate) {
+    const startDateFormatted = convertDateForSQL(startDate); // Convert startDate yyyy/mm/dd starting at 00:00:00
+    baseQuery += ' AND date >= ?';
+    params.push(startDateFormatted);
+  } else if (endDate) {
+    const endDateFormatted = convertDateForSQL(endDate, true); // Convert endDate yyyy/mm/dd ending at 23:59:59
+    baseQuery += ' AND date <= ?';
+    params.push(endDateFormatted);
+  }
+
+  baseQuery += ' ORDER BY date DESC, time DESC';
 
   try {
-    const stmt = parent
-  ? db.prepare('SELECT * FROM forms WHERE parent = ? AND (name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ?)')
-  : db.prepare('SELECT * FROM forms WHERE name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ?');
-
-    const params = parent ? [parent, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`] : [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
+    const stmt = db.prepare(baseQuery);
     const results = stmt.all(...params);
     res.json(results);
   } catch (error) {
@@ -107,6 +148,7 @@ app.get('/api/search', (req, res) => {
     res.status(500).json({ error: 'Failed to search forms' });
   }
 });
+
 
 // Socket.IO Connections
 io.on('connection', (socket) => {
