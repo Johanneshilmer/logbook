@@ -129,7 +129,7 @@ export default function Augustiner({ socket }) {
             setTimerStatus={setTimerStatus}
           />
         </Row>
-      </Container>
+      </Container> 
     </div>
   );
-}
+} 

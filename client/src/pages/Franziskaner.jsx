@@ -129,7 +129,7 @@ export default function Franziskaner({ socket }) {
             setTimerStatus={setTimerStatus}
           />
         </Row>
-      </Container>
+      </Container> 
     </div>
   );
-}
+} 

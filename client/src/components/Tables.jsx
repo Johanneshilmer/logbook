@@ -2,8 +2,9 @@ import React, { useState, useContext, useEffect, useCallback } from 'react';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import EditModal from './EditModal';
-import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
+import axios from 'axios';
+
 
 export default function Tables({ dataForms, setDataForms, timerStatus, setTimerStatus, parentIdentifier, editColor }) {
   const [editingItem, setEditingItem] = useState(null);
@@ -11,31 +12,11 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
 
   const socket = useContext(SocketContext);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('/api/forms', { params: { parent: parentIdentifier } });
-        const sortedData = response.data.sort((a, b) => {
-          const dateA = new Date(`${a.date.replaceAll("/", "-")}T${a.time}`);
-          const dateB = new Date(`${b.date.replaceAll("/", "-")}T${b.time}`);
-          return dateB - dateA;
-        });
-
-        setDataForms(sortedData.slice(0, 6));  // fetch the latest 6 entries
-      } catch (error) {
-        console.error('Error fetching forms:', error);
-      }
-    };
-
-    fetchData();
-  }, [parentIdentifier, setDataForms]);
-
   const handleNewForm = useCallback((newForm) => {
     if (newForm.parent === parentIdentifier) {
       setDataForms((prevDataForms) => {
         const exists = prevDataForms.some(item => item.id === newForm.id);
         if (exists) {
-          // --log warning only in development--
           if (process.env.NODE_ENV !== 'production') {
             console.warn('Duplicate form detected, skipping:', JSON.stringify(newForm, null, 2));
           }
@@ -45,7 +26,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
         let updatedData = [newForm, ...prevDataForms];
         
         if (updatedData.length > 6) {
-          updatedData = updatedData.slice(0, 6); // fetch only the latest 6 entries
+          updatedData = updatedData.slice(0, 6);
         }
         return updatedData;
       });
@@ -55,7 +36,6 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
   const handleUpdatedForm = useCallback((updatedForm) => {
     if (updatedForm.parent === parentIdentifier) {
       setDataForms((prevDataForms) => {
-        // Ensure the updated form replaces the old one instead of adding a new entry
         return prevDataForms.map((item) => 
           item.id === updatedForm.id ? updatedForm : item
         );
