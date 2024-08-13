@@ -14,6 +14,39 @@ export default function Franziskaner({ socket }) {
 
   const parentIdentifier = 'Franziskaner';  // Unique identifier for this parent
 
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('/api/forms', { params: { parent: parentIdentifier } });
+      const sortedData = response.data.sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time}`);
+        const dateB = new Date(`${b.date} ${b.time}`);
+        return dateB - dateA;
+      });
+      setDataForms(sortedData);
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    // Handling localStorage for timer
+    const startTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
+    const storedElapsedTime = localStorage.getItem(`${parentIdentifier}_elapsedTime`);
+
+    if (startTime) {
+      const elapsedTime = Date.now() - parseInt(startTime, 10) + (parseInt(storedElapsedTime) || 0);
+      handleTimerUpdate(formatTime(elapsedTime));
+      setTimerStart(true);
+      setTimerStatus('started');
+    } else if (storedElapsedTime) {
+      handleTimerUpdate(formatTime(parseInt(storedElapsedTime, 10)));
+      setTimerStatus('paused');
+    }
+  }, []);
+
   const handleStartTimer = () => {
     setTimerStart(true);
     setTimerStatus('started');
@@ -46,37 +79,6 @@ export default function Franziskaner({ socket }) {
   const handleTimerUpdate = (newTime) => {
     setTimerValue(newTime);
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('/api/forms', { params: { parent: parentIdentifier } });
-        const sortedData = response.data.sort((a, b) => {
-          const dateA = new Date(`${a.date} ${a.time}`);
-          const dateB = new Date(`${b.date} ${b.time}`);
-          return dateB - dateA;
-        });
-        setDataForms(sortedData);
-      } catch (error) {
-        console.error('Error fetching forms:', error);
-      }
-    };
-
-    fetchData();
-
-    const startTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
-    const storedElapsedTime = localStorage.getItem(`${parentIdentifier}_elapsedTime`);
-
-    if (startTime) {
-      const elapsedTime = Date.now() - parseInt(startTime, 10) + (parseInt(storedElapsedTime) || 0);
-      handleTimerUpdate(formatTime(elapsedTime));
-      setTimerStart(true);
-      setTimerStatus('started');
-    } else if (storedElapsedTime) {
-      handleTimerUpdate(formatTime(parseInt(storedElapsedTime, 10)));
-      setTimerStatus('paused');
-    }
-  }, []);
 
   const formatTime = (elapsedTime) => {
     const seconds = Math.floor((elapsedTime / 1000) % 60).toString().padStart(2, "0");
@@ -129,7 +131,8 @@ export default function Franziskaner({ socket }) {
             setTimerStatus={setTimerStatus}
           />
         </Row>
-      </Container> 
+      </Container>
     </div>
   );
-} 
+}
+ 

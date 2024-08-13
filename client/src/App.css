@@ -53,6 +53,10 @@
   padding-left: 10px;
 }
 
+.table-program {
+  width: 200px;
+}
+
 .action-buttons {
   display: flex;
   justify-content: center;

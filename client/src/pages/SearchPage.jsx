@@ -48,7 +48,7 @@ export default function SearchPage() {
       <td>{items.date}</td>
       <td>{items.time}</td>
       <td>{items.workOrder}</td>
-      <td>{items.program}</td>
+      <td className='table-program'>{items.program}</td>
       <td>{items.radios}</td>
       <td>{items.workTime}</td>
       <td>{items.solderTest ? 'Y' : 'N'}</td>

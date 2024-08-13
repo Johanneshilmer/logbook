@@ -74,7 +74,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
   }, [socket, handleNewForm, handleUpdatedForm, handleDeletedForm, handleTimerStatusUpdate]);
 
   const deleteHandler = async (id) => {
-    if ((timerStatus === 'started' || timerStatus === 'paused') && dataForms.length > 0 && dataForms[0].id === id) {
+    if ((timerStatus === 'started' || timerStatus === 'paused' || timerStatus === 'resumed') && dataForms.length > 0 && dataForms[0].id === id) {
       alert("Cannot delete the first row while the timer is running or paused.");
       return;
     }
@@ -141,7 +141,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
               <td>{items.date}</td>
               <td>{items.time}</td>
               <td>{items.workOrder}</td>
-              <td>{items.program}</td>
+              <td className='table-program'>{items.program}</td>
               <td>{items.radios}</td>
               <td>{items.workTime}</td>
               <td>{items.solderTest ? "Y" : "N"}</td>
@@ -156,7 +156,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
                     className='deletebtn'
                     variant="danger"
                     onClick={() => deleteHandler(items.id)}
-                    disabled={(timerStatus === 'started' || timerStatus === 'paused') && index === 0}
+                    disabled={(timerStatus === 'started' || timerStatus === 'paused' || timerStatus === 'resumed') && index === 0}
                   >
                     X
                   </Button>
