@@ -126,7 +126,7 @@ export default function SearchPage() {
         <Row className="mt-4">
           <Col>
             <h3>
-              Results <span>: <strong>{sortedDataForms.length}</strong> {sortedDataForms.length > 1 ? 'Changeovers' : 'Changeover'}</span>
+              Results <span>: {sortedDataForms.length} {sortedDataForms.length > 1 ? 'Changeovers' : 'Changeover'}</span>
 
             </h3>
             {results.length > 0 ? (

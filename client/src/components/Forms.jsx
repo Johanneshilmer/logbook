@@ -209,8 +209,7 @@ export default function Forms({
             id="custom-switch" 
             label="Solderability Test" 
             name="solderTest" 
-            onChange={handleChange} 
-            
+            onChange={handleChange}
           />
         </Col>
       </Row>
