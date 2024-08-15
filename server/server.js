@@ -25,27 +25,25 @@ app.use(express.json());
 // API Endpoints
 
 // Create a new form
-// Create a new form
 app.post('/api/forms', (req, res) => {
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment } = req.body;
 
-  let changeOver = '00:00:00';  // Default value
+  let changeOver = '00:00:00'; 
 
   try {
-    // Get the most recent form for the parent
+    // Get the latest data from db
     const prevForm = db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 1').get(parent);
 
-    // Capture the current date and time at the moment of form submission
-    const currentDateTime = new Date();  // Current time in local timezone
-    const time = currentDateTime.toTimeString().split(' ')[0];  // 'HH:MM:SS' format
+    // Get data and time from current submit
+    const currentDateTime = new Date();
+    const time = currentDateTime.toTimeString().split(' ')[0];
     
     // Convert date to 'YYYY/MM/DD' format
-    const date = currentDateTime.toISOString().split('T')[0].replace(/-/g, '/');  // 'YYYY/MM/DD' format
+    const date = currentDateTime.toISOString().split('T')[0].replace(/-/g, '/');
 
     if (prevForm) {
-      // Ensure previous form's date is in 'YYYY/MM/DD' format and time is in 'HH:MM:SS'
       const prevDate = prevForm.date.replace(/\//g, "-"); // Replace '/' with '-' to ensure format consistency
-      const prevTime = prevForm.time; // Assuming time is already in 'HH:MM:SS' format
+      const prevTime = prevForm.time;
 
       const prevDateTimeStr = `${prevDate}T${prevTime}`;
       const prevDateTime = new Date(prevDateTimeStr);
@@ -58,7 +56,7 @@ app.post('/api/forms', (req, res) => {
 
         if (workTimeArray.length !== 3) {
           console.error('Invalid workTime format:', workTime);
-          workTimeArray = ['00', '00', '00'];  // Fallback to 0 time if the format is incorrect
+          workTimeArray = ['00', '00', '00'];
         }
 
         const workHours = parseInt(workTimeArray[0], 10) || 0;
@@ -78,7 +76,6 @@ app.post('/api/forms', (req, res) => {
           changeOver = `${hours}:${minutes}:${seconds}`;
           console.log('Calculated changeOver:', changeOver);
         } else {
-          // If the current time is less than or equal to the previous time + work time
           changeOver = '00:00:00';
         }
       } else {

@@ -65,13 +65,12 @@ export default function Forms({
   const handleStartSubmit = async e => {
     e.preventDefault();
 
-    // Validation check for ID
+    // Check for ID
     if (!dataForm.name) {
       alert("Please enter your ID.");
       return;
     }
-
-    // Ensure the ID starts with the letter "t"
+    // Check for ID starts with "t"
     if (!dataForm.name.toLowerCase().startsWith('t')) {
       alert("Please enter your ID.");
       return;
@@ -90,7 +89,6 @@ export default function Forms({
       // Emit the new form to notify other clients
       socket.emit("createForm", response.data);
 
-      // Reset the form after submission
       setForm({
         parent: parent,
         name: "",
@@ -112,7 +110,7 @@ export default function Forms({
   const handleStopSubmit = async (e) => {
     e.preventDefault();
 
-    handleStopTimer(timerValue); // Stop the timer
+    handleStopTimer(timerValue);
     setTimerStatus('stopped');
     localStorage.setItem(`${parent}_timerStatus`, 'stopped');
     socket.emit('timerAction', { action: 'stop', parentIdentifier: parent });
@@ -124,13 +122,12 @@ export default function Forms({
         if (mostRecentForm) {
             const updatedForm = {
                 ...mostRecentForm,
-                workTime: timerValue, // Update the workTime with the timer value
+                workTime: timerValue,
             };
 
             // Update the form on the server
             await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
 
-            // Emit the updated form via socket
             socket.emit('updateForm', updatedForm);
 
             // Update the state to reflect the new workTime
@@ -173,10 +170,10 @@ export default function Forms({
 
   function handleEnterKey(e, nextElementId) {
     if (e.key === 'Enter') {
-      e.preventDefault(); // Prevent the form from submitting when Enter is pressed
+      e.preventDefault();
       const nextElement = document.querySelector(`[name="${nextElementId}"]`);
       if (nextElement) {
-        nextElement.focus(); // Move focus to the next element
+        nextElement.focus();
       }
     }
   }
