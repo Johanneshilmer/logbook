@@ -5,7 +5,6 @@ import EditModal from './EditModal';
 import SocketContext from '../socket/SocketContext';
 import axios from 'axios';
 
-
 export default function Tables({ dataForms, setDataForms, timerStatus, setTimerStatus, parentIdentifier, editColor }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -15,16 +14,14 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
   const handleNewForm = useCallback((newForm) => {
     if (newForm.parent === parentIdentifier) {
       setDataForms((prevDataForms) => {
-        const exists = prevDataForms.some(item => item.id === newForm.id);
-        if (exists) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.warn('Duplicate form detected, skipping:', JSON.stringify(newForm, null, 2));
-          }
-          return prevDataForms;
+        const formExists = prevDataForms.some(item => item.id === newForm.id);
+        if (!formExists) {
+          return [newForm, ...prevDataForms].slice(0, 6);
         }
-
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Duplicate form detected, skipping:', JSON.stringify(newForm, null, 2));
+        }
         let updatedData = [newForm, ...prevDataForms];
-        
         if (updatedData.length > 6) {
           updatedData = updatedData.slice(0, 6);
         }
@@ -35,19 +32,15 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
 
   const handleUpdatedForm = useCallback((updatedForm) => {
     if (updatedForm.parent === parentIdentifier) {
-      setDataForms((prevDataForms) => {
-        return prevDataForms.map((item) => 
-          item.id === updatedForm.id ? updatedForm : item
-        );
-      });
+      setDataForms(prevDataForms =>
+        prevDataForms.map(item => item.id === updatedForm.id ? updatedForm : item)
+      );
     }
   }, [parentIdentifier, setDataForms]);
 
   const handleDeletedForm = useCallback((deletedForm) => {
     if (deletedForm.parent === parentIdentifier) {
-      setDataForms((prevDataForms) =>
-        prevDataForms.filter((item) => item.id !== deletedForm.id)
-      );
+      setDataForms(prevDataForms => prevDataForms.filter(item => item.id !== deletedForm.id));
     }
   }, [parentIdentifier, setDataForms]);
 
@@ -64,8 +57,8 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
     socket.on('formDeleted', handleDeletedForm);
     socket.on('timerStatusUpdate', handleTimerStatusUpdate);
 
-    // Cleanup event listeners when component unmounts
     return () => {
+      // Cleanup event listeners when component unmounts
       socket.off('newForm', handleNewForm);
       socket.off('formUpdated', handleUpdatedForm);
       socket.off('formDeleted', handleDeletedForm);
@@ -78,10 +71,10 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
       alert("Cannot delete the first row while the timer is running or paused.");
       return;
     }
-  
+
     try {
       await axios.delete(`/api/forms/${id}`, { params: { parent: parentIdentifier } });
-      setDataForms((prevDataForms) => prevDataForms.filter((item) => item.id !== id));
+      setDataForms(prevDataForms => prevDataForms.filter(item => item.id !== id));
       socket.emit('deleteForm', { parent: parentIdentifier, id });
     } catch (error) {
       console.error('Error deleting data:', error);
@@ -89,7 +82,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
   };
 
   const startEditHandler = (id) => {
-    const itemToEdit = dataForms.find((item) => item.id === id);
+    const itemToEdit = dataForms.find(item => item.id === id);
     setEditingItem(itemToEdit);
     setShowModal(true);
   };
@@ -118,19 +111,24 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
 
   const displayedDataForms = sortedDataForms.slice(0, 6);
 
+  const formatTime = (time) => {
+    return time ? time.slice(0, 5) : '';
+  };
+
   return (
     <div className="table-responsive">
       <Table striped bordered hover className="custom-table">
         <thead>
           <tr>
             <th>Date</th>
-            <th>Time</th>
+            <th>Start time</th>
             <th>Work Order</th>
             <th>Program</th>
+            <th>Change Over Time</th>
             <th>Site</th>
             <th>Work Time</th>
             <th>Solder Test</th>
-            <th>Name</th>
+            <th>ID</th>
             <th>Comment</th>
             <th>Actions</th>
           </tr>
@@ -139,9 +137,10 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
           {displayedDataForms.map((items, index) => (
             <tr key={`${items.id}-${index}`}>
               <td>{items.date}</td>
-              <td>{items.time}</td>
+              <td>{formatTime(items.time)}</td>
               <td>{items.workOrder}</td>
               <td className='table-program'>{items.program}</td>
+              <td>{items.changeOver}</td>
               <td>{items.radios}</td>
               <td>{items.workTime}</td>
               <td>{items.solderTest ? "Y" : "N"}</td>

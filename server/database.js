@@ -9,6 +9,7 @@ db.exec(`
     workOrder TEXT,
     program TEXT,
     radios TEXT,
+    changeOver TEXT,
     workTime TEXT,
     solderTest INTEGER,
     comment TEXT,

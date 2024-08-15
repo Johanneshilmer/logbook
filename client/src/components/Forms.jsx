@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
@@ -32,16 +32,18 @@ export default function Forms({
   let date = newDate.getDate();
   let month = newDate.getMonth() + 1;
   let year = newDate.getFullYear();
+  const seconds = newDate.getSeconds().toString().padStart(2, '0');
   const minutes = newDate.getMinutes().toString().padStart(2, '0');
-  const showTime = newDate.getHours() + ':' + minutes;
+  const showTime = `${newDate.getHours()}:${minutes}:${seconds}`;
 
   const [dataForm, setForm] = useState({
     parent: parent,
     name: "",
     workOrder: "",
     program: "",
-    radios: radios[0].value,
+    changeOver: "00:00:00",
     workTime: "00:00:00",
+    radios: radios[0].value,
     solderTest: false,
     comment: "",
     date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
@@ -54,8 +56,7 @@ export default function Forms({
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
-
-    setForm((prevForm) => ({
+    setForm(prevForm => ({
       ...prevForm,
       [name]: type === "checkbox" ? checked : value,
     }));
@@ -64,7 +65,7 @@ export default function Forms({
   const handleStartSubmit = async e => {
     e.preventDefault();
 
-      // Validation check for ID and Work Order
+    // Validation check for ID
     if (!dataForm.name) {
       alert("Please enter your ID.");
       return;
@@ -76,62 +77,72 @@ export default function Forms({
       return;
     }
 
+    // Proceed with the timer and submission if validation passes
     handleStartTimer();
     setTimerStatus('started');
     localStorage.setItem(`${parent}_timerStatus`, 'started');
     socket.emit('timerAction', { action: 'start', parentIdentifier: parent });
-  
+
     try {
+      // Submit the form data to the server
       const response = await axios.post('/api/forms', dataForm);
-      const newDataForm = { ...dataForm, id: response.data.id };
-      const sortedData = [newDataForm, ...dataForms].sort((a, b) => {
-        const dateA = new Date(`${a.date} ${a.time}`);
-        const dateB = new Date(`${b.date} ${b.time}`);
-        return dateB - dateA;
-      });
-      setDataForms(sortedData);
+
+      // Emit the new form to notify other clients
+      socket.emit("createForm", response.data);
+
+      // Reset the form after submission
       setForm({
         parent: parent,
         name: "",
         workOrder: "",
         program: "",
-        radios: radios[0].value,
+        changeOver: "00:00:00",
         workTime: "00:00:00",
+        radios: radios[0].value,
         solderTest: false,
         comment: "",
         date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
         time: showTime,
       });
-      socket.emit("createForm", newDataForm);
     } catch (error) {
       console.error('Error submitting form:', error);
     }
   };
-  
+
   const handleStopSubmit = async (e) => {
     e.preventDefault();
-    handleStopTimer(timerValue);
+
+    handleStopTimer(timerValue); // Stop the timer
     setTimerStatus('stopped');
     localStorage.setItem(`${parent}_timerStatus`, 'stopped');
     socket.emit('timerAction', { action: 'stop', parentIdentifier: parent });
-  
-    const updatedDataForms = [...dataForms];
-    if (updatedDataForms.length > 0) {
-      const updatedForm = {
-        ...updatedDataForms[0],
-        workTime: timerValue,
-      };
-  
-      try {
-        await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
-        setDataForms(updatedDataForms.map(item => (item.id === updatedForm.id ? updatedForm : item)));
-        socket.emit('updateForm', updatedForm);
-      } catch (error) {
+
+    try {
+        // Find the most recent form by sorting the forms
+        const mostRecentForm = dataForms[0];
+
+        if (mostRecentForm) {
+            const updatedForm = {
+                ...mostRecentForm,
+                workTime: timerValue, // Update the workTime with the timer value
+            };
+
+            // Update the form on the server
+            await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
+
+            // Emit the updated form via socket
+            socket.emit('updateForm', updatedForm);
+
+            // Update the state to reflect the new workTime
+            setDataForms(prevDataForms =>
+                prevDataForms.map(item => (item.id === updatedForm.id ? updatedForm : item))
+            );
+        }
+    } catch (error) {
         console.error('Error updating the workTime:', error);
-      }
     }
-  };
-  
+};
+
   const handlePauseSubmit = e => {
     e.preventDefault();
     handlePauseTimer();
@@ -139,14 +150,14 @@ export default function Forms({
     localStorage.setItem(`${parent}_timerStatus`, 'paused');
     socket.emit('timerAction', { action: 'pause', parentIdentifier: parent });
   };
-  
+
   const handleResumeSubmit = e => {
     e.preventDefault();
     handleStartTimer();
     setTimerStatus('started');
     localStorage.setItem(`${parent}_timerStatus`, 'started');
     socket.emit('timerAction', { action: 'resume', parentIdentifier: parent });
-  }
+  };
 
   useEffect(() => {
     socket.on('timerStatusUpdate', (data) => {
@@ -160,25 +171,37 @@ export default function Forms({
     };
   }, [socket, parent]);
 
+  function handleEnterKey(e, nextElementId) {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent the form from submitting when Enter is pressed
+      const nextElement = document.querySelector(`[name="${nextElementId}"]`);
+      if (nextElement) {
+        nextElement.focus(); // Move focus to the next element
+      }
+    }
+  }
+  
+  
+
   return (
     <Form method="POST">
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formId">
           <FloatingLabel label="Enter Your ID">
-            <Form.Control type="text" placeholder="Your ID" value={dataForm.name} name="name" onChange={handleChange} />
+            <Form.Control type="text" placeholder="Your ID" value={dataForm.name} name="name" onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'workOrder')}/>
           </FloatingLabel>
         </Form.Group>
 
         <Form.Group as={Col} controlId="formWordOrder">
           <FloatingLabel label="Work Order">
-            <Form.Control type="text" placeholder="Work Order" value={dataForm.workOrder} name="workOrder" onChange={handleChange} />
+            <Form.Control type="text" placeholder="Work Order" value={dataForm.workOrder} name="workOrder" onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'program')}/>
           </FloatingLabel>
         </Form.Group>
       </Row>
 
       <Form.Group className="mb-3" controlId="formProgram">
         <FloatingLabel label="Siplace Program">
-          <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} />
+          <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'comment')} />
         </FloatingLabel>
       </Form.Group>
 

@@ -25,20 +25,81 @@ app.use(express.json());
 // API Endpoints
 
 // Create a new form
+// Create a new form
 app.post('/api/forms', (req, res) => {
-  const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
+  const { parent, name, workOrder, program, radios, workTime, solderTest, comment } = req.body;
+
+  let changeOver = '00:00:00';  // Default value
 
   try {
-    const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time);
-    const newForm = { ...req.body, id: info.lastInsertRowid };
+    // Get the most recent form for the parent
+    const prevForm = db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 1').get(parent);
+
+    // Capture the current date and time at the moment of form submission
+    const currentDateTime = new Date();  // Current time in local timezone
+    const time = currentDateTime.toTimeString().split(' ')[0];  // 'HH:MM:SS' format
+    
+    // Convert date to 'YYYY/MM/DD' format
+    const date = currentDateTime.toISOString().split('T')[0].replace(/-/g, '/');  // 'YYYY/MM/DD' format
+
+    if (prevForm) {
+      // Ensure previous form's date is in 'YYYY/MM/DD' format and time is in 'HH:MM:SS'
+      const prevDate = prevForm.date.replace(/\//g, "-"); // Replace '/' with '-' to ensure format consistency
+      const prevTime = prevForm.time; // Assuming time is already in 'HH:MM:SS' format
+
+      const prevDateTimeStr = `${prevDate}T${prevTime}`;
+      const prevDateTime = new Date(prevDateTimeStr);
+
+      if (!isNaN(prevDateTime.getTime()) && !isNaN(currentDateTime.getTime())) {
+        console.log('Previous DateTime:', prevDateTime.toString());
+        console.log('Current DateTime:', currentDateTime.toString());
+
+        let workTimeArray = workTime ? workTime.split(':') : ['00', '00', '00'];
+
+        if (workTimeArray.length !== 3) {
+          console.error('Invalid workTime format:', workTime);
+          workTimeArray = ['00', '00', '00'];  // Fallback to 0 time if the format is incorrect
+        }
+
+        const workHours = parseInt(workTimeArray[0], 10) || 0;
+        const workMinutes = parseInt(workTimeArray[1], 10) || 0;
+        const workSeconds = parseInt(workTimeArray[2], 10) || 0;
+
+        const workTimeMs = (workHours * 60 * 60 + workMinutes * 60 + workSeconds) * 1000;
+
+        const prevDateTimeWithWorkTime = new Date(prevDateTime.getTime() + workTimeMs);
+        const changeOverMs = currentDateTime - prevDateTimeWithWorkTime;
+
+        if (changeOverMs > 0) {
+          const changeOverSeconds = Math.floor(changeOverMs / 1000);
+          const hours = Math.floor(changeOverSeconds / 3600).toString().padStart(2, '0');
+          const minutes = Math.floor((changeOverSeconds % 3600) / 60).toString().padStart(2, '0');
+          const seconds = (changeOverSeconds % 60).toString().padStart(2, '0');
+          changeOver = `${hours}:${minutes}:${seconds}`;
+          console.log('Calculated changeOver:', changeOver);
+        } else {
+          // If the current time is less than or equal to the previous time + work time
+          changeOver = '00:00:00';
+        }
+      } else {
+        console.error('Invalid DateTime objects:', { prevDateTime, currentDateTime });
+      }
+    }
+
+    // Insert into the forms table
+    const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, changeOver, workTime, solderTest, comment, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, comment, date, time);
+
+    const newForm = { ...req.body, id: info.lastInsertRowid, changeOver, date, time };
     io.emit('newForm', { parent, ...newForm });
     res.status(201).json({ id: info.lastInsertRowid });
   } catch (error) {
-    console.error('Error inserting form:', error);
+    console.error('Error inserting form:', error.message, error.stack);
     res.status(500).json({ error: 'Failed to create form' });
   }
 });
+
+
 
 // Get forms data
 app.get('/api/forms', (req, res) => {
@@ -46,8 +107,8 @@ app.get('/api/forms', (req, res) => {
 
   try {
     const stmt = parent 
-    ? db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC')
-    : db.prepare('SELECT * FROM forms ORDER BY date DESC, time DESC');
+      ? db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC')
+      : db.prepare('SELECT * FROM forms ORDER BY date DESC, time DESC');
 
     const forms = parent ? stmt.all(parent) : stmt.all();
     res.json(forms);
@@ -57,22 +118,26 @@ app.get('/api/forms', (req, res) => {
   }
 });
 
+
 // Update a form
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
-  const { parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time } = req.body;
+  const { parent, name, workOrder, program, radios, changeOver, workTime, solderTest, comment, date, time } = req.body;
 
   try {
-    const stmt = db.prepare('UPDATE forms SET parent = ?, name = ?, workOrder = ?, program = ?, radios = ?, workTime = ?, solderTest = ?, comment = ?, date = ?, time = ? WHERE id = ?');
-    stmt.run(parent, name, workOrder, program, radios, workTime, solderTest ? 1 : 0, comment, date, time, id);
-    const updatedForm = { id, parent, name, workOrder, program, radios, workTime, solderTest, comment, date, time };
+    const stmt = db.prepare('UPDATE forms SET parent = ?, name = ?, workOrder = ?, program = ?, radios = ?, changeOver = ?, workTime = ?, solderTest = ?, comment = ?, date = ?, time = ? WHERE id = ?');
+    stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, comment, date, time, id);
+    const updatedForm = { id, parent, name, workOrder, program, radios, changeOver, workTime, solderTest, comment, date, time };
     io.emit('formUpdated', updatedForm);
     res.sendStatus(200);
   } catch (error) {
-    console.error('Error updating form:', error);
+    console.error('Error updating form:', error.message, error.stack);
     res.status(500).json({ error: 'Failed to update form' });
   }
 });
+
+
+
 
 // Delete a form by ID
 app.delete('/api/forms/:id', (req, res) => {

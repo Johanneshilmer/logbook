@@ -43,12 +43,18 @@ export default function SearchPage() {
   const currentRows = sortedDataForms.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(sortedDataForms.length / rowsPerPage);
 
+
+  const formatTime = (time) => {
+    return time ? time.slice(0, 5) : '';
+  };
+
   const tableRows = currentRows.map((items) => (
     <tr key={items.id}>
       <td>{items.date}</td>
-      <td>{items.time}</td>
+      <td>{formatTime(items.time)}</td>
       <td>{items.workOrder}</td>
       <td className='table-program'>{items.program}</td>
+      <td>{items.changeOver}</td>
       <td>{items.radios}</td>
       <td>{items.workTime}</td>
       <td>{items.solderTest ? 'Y' : 'N'}</td>
@@ -138,6 +144,7 @@ export default function SearchPage() {
                       <th>Start Time</th>
                       <th>Order</th>
                       <th>Program</th>
+                      <th>Change Over Time</th>
                       <th>Site</th>
                       <th>Work Time</th>
                       <th>Solder Test</th>
