@@ -49,8 +49,6 @@ app.post('/api/forms', (req, res) => {
       const prevDateTime = new Date(prevDateTimeStr);
 
       if (!isNaN(prevDateTime.getTime()) && !isNaN(currentDateTime.getTime())) {
-        console.log('Previous DateTime:', prevDateTime.toString());
-        console.log('Current DateTime:', currentDateTime.toString());
 
         let workTimeArray = workTime ? workTime.split(':') : ['00', '00', '00'];
 
@@ -74,7 +72,6 @@ app.post('/api/forms', (req, res) => {
           const minutes = Math.floor((changeOverSeconds % 3600) / 60).toString().padStart(2, '0');
           const seconds = (changeOverSeconds % 60).toString().padStart(2, '0');
           changeOver = `${hours}:${minutes}:${seconds}`;
-          console.log('Calculated changeOver:', changeOver);
         } else {
           changeOver = '00:00:00';
         }
