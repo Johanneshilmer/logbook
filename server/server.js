@@ -24,6 +24,7 @@ app.use(express.json());
 
 // API Endpoints
 
+
 // Create a new form
 app.post('/api/forms', (req, res) => {
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment } = req.body;
@@ -31,39 +32,33 @@ app.post('/api/forms', (req, res) => {
   let changeOver = '00:00:00'; 
 
   try {
-    // Get the latest data from db
+    // Get the latest data from the database with same parent
     const prevForm = db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 1').get(parent);
 
-    // Get data and time from current submit
+    // Current date and time
     const currentDateTime = new Date();
     const time = currentDateTime.toTimeString().split(' ')[0];
-    
-    // Convert date to 'YYYY/MM/DD' format
     const date = currentDateTime.toISOString().split('T')[0].replace(/-/g, '/');
 
-    if (prevForm) {
-      const prevDate = prevForm.date.replace(/\//g, "-"); // Replace '/' with '-' to ensure format consistency
-      const prevTime = prevForm.time;
 
-      const prevDateTimeStr = `${prevDate}T${prevTime}`;
+    if (prevForm) {
+
+      const prevDateTimeStr = `${prevForm.date.replace(/\//g, "-")}T${prevForm.time}`;
       const prevDateTime = new Date(prevDateTimeStr);
 
       if (!isNaN(prevDateTime.getTime()) && !isNaN(currentDateTime.getTime())) {
-
-        let workTimeArray = workTime ? workTime.split(':') : ['00', '00', '00'];
-
-        if (workTimeArray.length !== 3) {
-          console.error('Invalid workTime format:', workTime);
-          workTimeArray = ['00', '00', '00'];
-        }
-
+        // Parse the workTime from the previous form
+        let workTimeArray = prevForm.workTime.split(':');
         const workHours = parseInt(workTimeArray[0], 10) || 0;
         const workMinutes = parseInt(workTimeArray[1], 10) || 0;
         const workSeconds = parseInt(workTimeArray[2], 10) || 0;
 
         const workTimeMs = (workHours * 60 * 60 + workMinutes * 60 + workSeconds) * 1000;
 
+        // Calculate the previous form's end time
         const prevDateTimeWithWorkTime = new Date(prevDateTime.getTime() + workTimeMs);
+
+        // Calculate the changeOver time
         const changeOverMs = currentDateTime - prevDateTimeWithWorkTime;
 
         if (changeOverMs > 0) {
@@ -80,7 +75,7 @@ app.post('/api/forms', (req, res) => {
       }
     }
 
-    // Insert into the forms table
+    // Insert the new form data into the database
     const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, changeOver, workTime, solderTest, comment, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, comment, date, time);
 
@@ -92,7 +87,6 @@ app.post('/api/forms', (req, res) => {
     res.status(500).json({ error: 'Failed to create form' });
   }
 });
-
 
 
 // Get forms data
