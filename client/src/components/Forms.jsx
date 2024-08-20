@@ -84,28 +84,40 @@ export default function Forms({
 
   const handleStopSubmit = async (e) => {
     e.preventDefault();
-
+  
     setTimerStatus('stopped');
     localStorage.setItem(`${parent}_timerStatus`, 'stopped');
     socket.emit('timerAction', { action: 'stop', parentIdentifier: parent });
-
+  
+    const stopTime = new Date().toTimeString().split(' ')[0]; // Capture the current stop time
     const updatedWorkTime = formatTime(elapsedTime);  // Use elapsedTime passed from Timer
-
+  
     try {
-      const mostRecentForm = dataForms[0];
+      const mostRecentForm = dataForms[0];  // Assume dataForms is sorted with the most recent form first
+  
       if (mostRecentForm) {
         const updatedForm = {
           ...mostRecentForm,
           workTime: updatedWorkTime,
+          stopTime: stopTime,  // Update the stop time
         };
+  
+        // Update the form in the database
         await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
+  
+        // Notify other parts of the application about the form update
         socket.emit('updateForm', updatedForm);
+  
+        // Update local state
         setDataForms(prevDataForms => prevDataForms.map(item => (item.id === updatedForm.id ? updatedForm : item)));
       }
     } catch (error) {
-      console.error('Error updating the workTime:', error);
+      console.error('Error updating the stopTime:', error);
     }
   };
+  
+
+
 
   const handlePauseSubmit = e => {
     e.preventDefault();

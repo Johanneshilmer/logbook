@@ -14,7 +14,8 @@ db.exec(`
     solderTest INTEGER,
     comment TEXT,
     date TEXT,
-    time TEXT
+    time TEXT,
+    stopTime TEXT
   );
 `);
 
