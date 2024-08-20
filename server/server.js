@@ -199,36 +199,78 @@ app.get('/api/search', (req, res) => {
   }
 });
 
-
 // Socket.IO Connections
+const timerStates = {}; // Object to store timer state for each parent
+
 io.on('connection', (socket) => {
 
-  // Handle timer actions
-  socket.on('timerAction', (data) => {
-    const { action, elapsedTime, parentIdentifier } = data;
-  
-    switch (action) {
-      case 'start':
-        io.emit('timerStatusUpdate', { status: 'started', elapsedTime, parentIdentifier });
-        break;
-      case 'stop':
-        io.emit('timerStatusUpdate', { status: 'stopped', elapsedTime: 0, parentIdentifier });
-        break;
-      case 'pause':
-        io.emit('timerStatusUpdate', { status: 'paused', elapsedTime, parentIdentifier });
-        break;
-      case 'resume':
-        io.emit('timerStatusUpdate', { status: 'resumed', elapsedTime, parentIdentifier });
-        break;
-      default:
-        console.log('Unknown timer action:', action);
+  // Handle user joining a specific parentIdentifier
+  socket.on('joinParent', (parentIdentifier) => {
+    if (timerStates[parentIdentifier]) {
+      const { status, startTime, elapsedTime } = timerStates[parentIdentifier];
+      let currentElapsedTime = elapsedTime;
+
+      if (status === 'started' || status === 'resumed') {
+        currentElapsedTime += Date.now() - startTime;
+      }
+
+      socket.emit('timerStatusUpdate', {
+        status,
+        elapsedTime: currentElapsedTime,
+        parentIdentifier
+      });
+    } else {
+      socket.emit('timerStatusUpdate', {
+        status: 'stopped',
+        elapsedTime: 0,
+        parentIdentifier
+      });
     }
   });
 
-  // Broadcast the new form to all clients
-  socket.on('createForm', (formData) => {
-    io.emit('newForm', formData);
-  });
+  // Handle timer actions (start, stop, pause, resume)
+  socket.on('timerAction', (data) => {
+    const { action, elapsedTime, parentIdentifier } = data;
+
+    if (!timerStates[parentIdentifier]) {
+        timerStates[parentIdentifier] = {
+            status: 'stopped',
+            elapsedTime: 0,
+            startTime: null,
+        };
+    }
+
+    switch (action) {
+        case 'start':
+            timerStates[parentIdentifier].status = 'started';
+            timerStates[parentIdentifier].startTime = Date.now();
+            timerStates[parentIdentifier].elapsedTime = 0;
+            break;
+        case 'stop':
+            timerStates[parentIdentifier].status = 'stopped';
+            timerStates[parentIdentifier].elapsedTime = elapsedTime;
+            timerStates[parentIdentifier].startTime = null;
+            break;
+        case 'pause':
+            timerStates[parentIdentifier].status = 'paused';
+            timerStates[parentIdentifier].elapsedTime += Date.now() - timerStates[parentIdentifier].startTime;
+            timerStates[parentIdentifier].startTime = null;
+            break;
+        case 'resume':
+            timerStates[parentIdentifier].status = 'resumed';
+            timerStates[parentIdentifier].startTime = Date.now();
+            break;
+        default:
+            console.log('Unknown timer action:', action);
+    }
+
+    io.emit('timerStatusUpdate', {
+        status: timerStates[parentIdentifier].status,
+        elapsedTime: timerStates[parentIdentifier].elapsedTime,
+        parentIdentifier
+    });
+});
+
 
   // Update form
   socket.on('updateForm', (formData) => {
@@ -240,6 +282,10 @@ io.on('connection', (socket) => {
     io.emit('formDeleted', formId);
   });
 });
+
+
+
+
 
 // Start the server
 server.listen(PORT, () => {

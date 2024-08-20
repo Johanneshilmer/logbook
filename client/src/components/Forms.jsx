@@ -9,16 +9,14 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
 
+
 export default function Forms({ 
   dataForms, 
   setDataForms, 
-  handleStartTimer, 
-  handlePauseTimer, 
-  handleStopTimer, 
-  timerValue, 
   parent,
   toggleColor,
-  editColor
+  editColor,
+  elapsedTime  // Receive elapsedTime from the Timer component
 }) {
   const radios = [
     { name: 'TOP', value: 'TOP' },
@@ -26,15 +24,18 @@ export default function Forms({
     { name: 'SETUP', value: 'SETUP' },
   ];
 
-  const socket = useContext(SocketContext);
+  const formatTime = (elapsedTime) => {
+    if (isNaN(elapsedTime) || elapsedTime < 0) {
+      return "00:00:00"; // Default to zero time if the input is invalid
+    }
+    const seconds = Math.floor((elapsedTime / 1000) % 60).toString().padStart(2, "0");
+    const minutes = Math.floor((elapsedTime / 1000 / 60) % 60).toString().padStart(2, "0");
+    const hours = Math.floor(elapsedTime / 1000 / 60 / 60).toString().padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
+  };
+  
 
-  let newDate = new Date();
-  let date = newDate.getDate();
-  let month = newDate.getMonth() + 1;
-  let year = newDate.getFullYear();
-  const seconds = newDate.getSeconds().toString().padStart(2, '0');
-  const minutes = newDate.getMinutes().toString().padStart(2, '0');
-  const showTime = `${newDate.getHours()}:${minutes}:${seconds}`;
+  const socket = useContext(SocketContext);
 
   const [dataForm, setForm] = useState({
     parent: parent,
@@ -46,8 +47,6 @@ export default function Forms({
     radios: radios[0].value,
     solderTest: false,
     comment: "",
-    date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
-    time: showTime,
   });
 
   const [timerStatus, setTimerStatus] = useState(() => {
@@ -65,43 +64,19 @@ export default function Forms({
   const handleStartSubmit = async e => {
     e.preventDefault();
 
-    // Check for ID
-    if (!dataForm.name) {
-      alert("Please enter your ID.");
-      return;
-    }
-    // Check for ID starts with "t"
-    if (!dataForm.name.toLowerCase().startsWith('t')) {
-      alert("Please enter your ID.");
+    if (!dataForm.name || !dataForm.name.toLowerCase().startsWith('t')) {
+      alert("Please enter a valid ID.");
       return;
     }
 
-    // Proceed with the timer and submission if validation passes
-    handleStartTimer();
     setTimerStatus('started');
     localStorage.setItem(`${parent}_timerStatus`, 'started');
     socket.emit('timerAction', { action: 'start', parentIdentifier: parent });
 
     try {
-      // Submit the form data to the server
       const response = await axios.post('/api/forms', dataForm);
-
-      // Emit the new form to notify other clients
       socket.emit("createForm", response.data);
-
-      setForm({
-        parent: parent,
-        name: "",
-        workOrder: "",
-        program: "",
-        changeOver: "00:00:00",
-        workTime: "00:00:00",
-        radios: radios[0].value,
-        solderTest: false,
-        comment: "",
-        date: `${year}/${month < 10 ? `0${month}` : `${month}`}/${date}`,
-        time: showTime,
-      });
+      resetForm();
     } catch (error) {
       console.error('Error submitting form:', error);
     }
@@ -110,39 +85,30 @@ export default function Forms({
   const handleStopSubmit = async (e) => {
     e.preventDefault();
 
-    handleStopTimer(timerValue);
     setTimerStatus('stopped');
     localStorage.setItem(`${parent}_timerStatus`, 'stopped');
     socket.emit('timerAction', { action: 'stop', parentIdentifier: parent });
 
+    const updatedWorkTime = formatTime(elapsedTime);  // Use elapsedTime passed from Timer
+
     try {
-        // Find the most recent form by sorting the forms
-        const mostRecentForm = dataForms[0];
-
-        if (mostRecentForm) {
-            const updatedForm = {
-                ...mostRecentForm,
-                workTime: timerValue,
-            };
-
-            // Update the form on the server
-            await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
-
-            socket.emit('updateForm', updatedForm);
-
-            // Update the state to reflect the new workTime
-            setDataForms(prevDataForms =>
-                prevDataForms.map(item => (item.id === updatedForm.id ? updatedForm : item))
-            );
-        }
+      const mostRecentForm = dataForms[0];
+      if (mostRecentForm) {
+        const updatedForm = {
+          ...mostRecentForm,
+          workTime: updatedWorkTime,
+        };
+        await axios.put(`/api/forms/${updatedForm.id}`, updatedForm);
+        socket.emit('updateForm', updatedForm);
+        setDataForms(prevDataForms => prevDataForms.map(item => (item.id === updatedForm.id ? updatedForm : item)));
+      }
     } catch (error) {
-        console.error('Error updating the workTime:', error);
+      console.error('Error updating the workTime:', error);
     }
-};
+  };
 
   const handlePauseSubmit = e => {
     e.preventDefault();
-    handlePauseTimer();
     setTimerStatus('paused');
     localStorage.setItem(`${parent}_timerStatus`, 'paused');
     socket.emit('timerAction', { action: 'pause', parentIdentifier: parent });
@@ -150,10 +116,23 @@ export default function Forms({
 
   const handleResumeSubmit = e => {
     e.preventDefault();
-    handleStartTimer();
-    setTimerStatus('started');
-    localStorage.setItem(`${parent}_timerStatus`, 'started');
+    setTimerStatus('resumed'); // Update to resumed state
+    localStorage.setItem(`${parent}_timerStatus`, 'resumed');
     socket.emit('timerAction', { action: 'resume', parentIdentifier: parent });
+  };
+
+  const resetForm = () => {
+    setForm({
+      parent: parent,
+      name: "",
+      workOrder: "",
+      program: "",
+      changeOver: "00:00:00",
+      workTime: "00:00:00",
+      radios: radios[0].value,
+      solderTest: false,
+      comment: "",
+    });
   };
 
   useEffect(() => {
@@ -163,42 +142,31 @@ export default function Forms({
         localStorage.setItem(`${parent}_timerStatus`, data.status);
       }
     });
+
     return () => {
       socket.off('timerStatusUpdate');
     };
   }, [socket, parent]);
-
-  function handleEnterKey(e, nextElementId) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const nextElement = document.querySelector(`[name="${nextElementId}"]`);
-      if (nextElement) {
-        nextElement.focus();
-      }
-    }
-  }
-  
-  
 
   return (
     <Form method="POST">
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formId">
           <FloatingLabel label="Enter Your ID">
-            <Form.Control type="text" placeholder="Your ID" value={dataForm.name} name="name" onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'workOrder')}/>
+            <Form.Control type="text" placeholder="Your ID" value={dataForm.name} name="name" onChange={handleChange} />
           </FloatingLabel>
         </Form.Group>
 
         <Form.Group as={Col} controlId="formWordOrder">
           <FloatingLabel label="Work Order">
-            <Form.Control type="text" placeholder="Work Order" value={dataForm.workOrder} name="workOrder" onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'program')}/>
+            <Form.Control type="text" placeholder="Work Order" value={dataForm.workOrder} name="workOrder" onChange={handleChange} />
           </FloatingLabel>
         </Form.Group>
       </Row>
 
       <Form.Group className="mb-3" controlId="formProgram">
         <FloatingLabel label="Siplace Program">
-          <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'comment')} />
+          <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} />
         </FloatingLabel>
       </Form.Group>
 
@@ -247,11 +215,16 @@ export default function Forms({
           </Button>
         )}
         {timerStatus === 'paused' && (
-          <Button variant='success' type="button" onClick={handleResumeSubmit}>
-            RESUME
-          </Button>
+          <div>
+            <Button variant="danger" type="button" onClick={handleStopSubmit}>
+              STOP
+            </Button>
+            <Button variant='success' type="button" onClick={handleResumeSubmit}>
+              RESUME
+            </Button>
+          </div>
         )}
-        {(timerStatus === 'started' || timerStatus === 'paused' || timerStatus === 'resumed') && (
+        {(timerStatus === 'started' || timerStatus === 'resumed') && (
           <div>
             <Button variant="danger" type="button" onClick={handleStopSubmit}>
               STOP

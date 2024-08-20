@@ -11,9 +11,9 @@ export default function Franziskaner({ socket }) {
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
   const [timerStatus, setTimerStatus] = useState('stopped');
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   const parentIdentifier = 'Franziskaner';  // Unique identifier for this parent
-
 
   const fetchData = async () => {
     try {
@@ -32,7 +32,6 @@ export default function Franziskaner({ socket }) {
   useEffect(() => {
     fetchData();
 
-    // Handling localStorage for timer
     const startTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
     const storedElapsedTime = localStorage.getItem(`${parentIdentifier}_elapsedTime`);
 
@@ -41,9 +40,11 @@ export default function Franziskaner({ socket }) {
       handleTimerUpdate(formatTime(elapsedTime));
       setTimerStart(true);
       setTimerStatus('started');
+      setElapsedTime(elapsedTime);
     } else if (storedElapsedTime) {
       handleTimerUpdate(formatTime(parseInt(storedElapsedTime, 10)));
       setTimerStatus('paused');
+      setElapsedTime(parseInt(storedElapsedTime, 10));
     }
   }, []);
 
@@ -108,6 +109,7 @@ export default function Franziskaner({ socket }) {
               timerValue={timerValue}
               timerStatus={timerStatus}
               socket={socket}
+              elapsedTime={elapsedTime}
             />
           </Col>
           <Col>
@@ -118,6 +120,7 @@ export default function Franziskaner({ socket }) {
               socket={socket} 
               initialValue={timerValue}
               parentIdentifier={parentIdentifier}
+              setElapsedTimeInParent={setElapsedTime}
             />
           </Col>
         </Row>
@@ -135,4 +138,3 @@ export default function Franziskaner({ socket }) {
     </div>
   );
 }
- 

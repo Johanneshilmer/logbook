@@ -2,74 +2,63 @@ import React, { useEffect, useState, useCallback, useRef, useContext } from 'rea
 import { Col, Container, Row } from 'react-bootstrap';
 import SocketContext from '../socket/SocketContext';
 
+// Default value for timer
 const formatTime = (elapsedTime) => {
+  if (isNaN(elapsedTime) || elapsedTime < 0) {
+    return "00:00:00";
+  }
   const seconds = Math.floor((elapsedTime / 1000) % 60).toString().padStart(2, "0");
   const minutes = Math.floor((elapsedTime / 1000 / 60) % 60).toString().padStart(2, "0");
   const hours = Math.floor(elapsedTime / 1000 / 60 / 60).toString().padStart(2, "0");
   return `${hours}:${minutes}:${seconds}`;
 };
 
-export default function Timer({ text, start, onUpdate, initialValue, parentIdentifier }) {
+export default function Timer({ text, parentIdentifier, onUpdate, setElapsedTimeInParent }) {
   const socket = useContext(SocketContext);
-  const [time, setTime] = useState(initialValue || "00:00:00");
-  const [startTime, setStartTime] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [time, setTime] = useState("00:00:00");
+  const [elapsedTime, setElapsedTimeState] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const timerId = useRef(null);
 
-  const startTimer = useCallback(() => {
-    if (!startTime) return;
-    timerId.current = setInterval(() => {
-      const currentTime = Date.now();
-      const totalElapsedTime = currentTime - startTime + elapsedTime;
-      const formattedTime = formatTime(totalElapsedTime);
-      setTime(formattedTime);
-      onUpdate(formattedTime);
-    }, 1000);
-  }, [startTime, elapsedTime, onUpdate]);
-
-  useEffect(() => {
-    if (timerRunning) {
-      startTimer();
-    } else {
-      clearInterval(timerId.current);
-      timerId.current = null;
+  const updateTimerDisplay = useCallback((newElapsedTime) => {
+    const formattedTime = formatTime(newElapsedTime);
+    setTime(formattedTime);
+    setElapsedTimeState(newElapsedTime); // Update local state
+    if (setElapsedTimeInParent) {
+      setElapsedTimeInParent(newElapsedTime);
     }
+    if (onUpdate) {
+      onUpdate(formattedTime);
+    }
+  }, [setElapsedTimeInParent, onUpdate]);
 
-    return () => clearInterval(timerId.current);
-  }, [timerRunning, startTimer]);
+  const startTimer = useCallback(() => {
+    timerId.current = setInterval(() => {
+      setElapsedTimeState((prevElapsedTime) => {
+        const newElapsedTime = prevElapsedTime + 1000;
+        updateTimerDisplay(newElapsedTime);
+        return newElapsedTime;
+      });
+    }, 1000);
+  }, [updateTimerDisplay]);
 
   useEffect(() => {
+    socket.emit('joinParent', parentIdentifier);
+
     const handleTimerStatusUpdate = ({ status, elapsedTime: newElapsedTime, parentIdentifier: id }) => {
       if (id === parentIdentifier) {
-        if (status === 'started') {
-          const now = Date.now();
-          setStartTime(now);
-          setElapsedTime(newElapsedTime || 0);
+        clearInterval(timerId.current); // Clear any existing intervals
+
+        const timeToSet = newElapsedTime || 0;
+        setElapsedTimeState(timeToSet);
+        updateTimerDisplay(timeToSet);
+
+        if (status === 'started' || status === 'resumed') {
           setTimerRunning(true);
-          localStorage.setItem(`${parentIdentifier}_timerStartTime`, now);
-          localStorage.setItem(`${parentIdentifier}_elapsedTime`, newElapsedTime || 0);
-        } else if (status === 'resumed') {
-          const savedElapsedTime = parseInt(localStorage.getItem(`${parentIdentifier}_elapsedTime`), 10) || 0;
-          const now = Date.now();
-          setStartTime(now);
-          setElapsedTime(savedElapsedTime); // Keep the accumulated elapsedTime
-          setTimerRunning(true);
-        } else if (status === 'stopped') {
+          startTimer();
+        } else {
           setTimerRunning(false);
-          setStartTime(null);
-          setElapsedTime(0);
-          setTime("00:00:00");
-          localStorage.removeItem(`${parentIdentifier}_timerStartTime`);
-          localStorage.removeItem(`${parentIdentifier}_elapsedTime`);
-        } else if (status === 'paused') {
-          const currentTime = Date.now();
-          const newElapsedTime = elapsedTime + (currentTime - startTime);
-          setElapsedTime(newElapsedTime);
-          setTimerRunning(false);
-          localStorage.setItem(`${parentIdentifier}_elapsedTime`, newElapsedTime);
           clearInterval(timerId.current);
-          timerId.current = null;
         }
       }
     };
@@ -78,25 +67,9 @@ export default function Timer({ text, start, onUpdate, initialValue, parentIdent
 
     return () => {
       socket.off("timerStatusUpdate", handleTimerStatusUpdate);
+      clearInterval(timerId.current);
     };
-  }, [socket, startTime, elapsedTime, parentIdentifier]);
-
-  useEffect(() => {
-    const savedStartTime = localStorage.getItem(`${parentIdentifier}_timerStartTime`);
-    const savedElapsedTime = parseInt(localStorage.getItem(`${parentIdentifier}_elapsedTime`), 10) || 0;
-
-    if (savedStartTime && start) {
-      const now = Date.now();
-      const elapsed = now - parseInt(savedStartTime, 10) + savedElapsedTime;
-      setStartTime(parseInt(savedStartTime, 10));
-      setElapsedTime(savedElapsedTime);
-      setTime(formatTime(elapsed));
-      setTimerRunning(true);
-    } else if (!timerRunning && savedElapsedTime) {
-      setTime(formatTime(savedElapsedTime));
-      setElapsedTime(savedElapsedTime);
-    }
-  }, [parentIdentifier, timerRunning, start]);
+  }, [socket, parentIdentifier, startTimer, updateTimerDisplay]);
 
   return (
     <Container>
