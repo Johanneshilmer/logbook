@@ -160,25 +160,35 @@ export default function Forms({
     };
   }, [socket, parent]);
 
+  function handleEnterKey(e, nextElementId) {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent the form from submitting when Enter is pressed
+      const nextElement = document.querySelector(`[name="${nextElementId}"]`);
+      if (nextElement) {
+        nextElement.focus(); // Move focus to the next element
+      }
+    }
+  }
+
   return (
     <Form method="POST">
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formId">
           <FloatingLabel label="Enter Your ID">
-            <Form.Control type="text" placeholder="Your ID" value={dataForm.name} name="name" onChange={handleChange} />
+            <Form.Control type="text" placeholder="Your ID" value={dataForm.name} name="name" onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'workOrder')}/>
           </FloatingLabel>
         </Form.Group>
 
         <Form.Group as={Col} controlId="formWordOrder">
           <FloatingLabel label="Work Order">
-            <Form.Control type="text" placeholder="Work Order" value={dataForm.workOrder} name="workOrder" onChange={handleChange} />
+            <Form.Control type="text" placeholder="Work Order" value={dataForm.workOrder} name="workOrder" onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'program')}/>
           </FloatingLabel>
         </Form.Group>
       </Row>
 
       <Form.Group className="mb-3" controlId="formProgram">
         <FloatingLabel label="Siplace Program">
-          <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} />
+          <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'comment')}/>
         </FloatingLabel>
       </Form.Group>
 
