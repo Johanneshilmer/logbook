@@ -1,29 +1,34 @@
 # Manufacturing Work Order Tracker
-Overview
-This project is a Manufacturing Work Order Tracker that helps users log work orders, record work time, and manage comments and solderability test statuses. It includes a form submission feature, a timer, and a data table displaying the logged work orders. The project is built using React for the frontend and Node.js with Express for the backend, along with SQLite for the database.
+## Overview
+The **Manufacturing Work Order Tracker** is a comprehensive tool designed to help users efficiently log work orders, record work time, manage comments, and track solderability test statuses. The tracker supports a range of features including form submission, time tracking, data management, and advanced search capabilities. The project is built using **React** for the frontend, **Node.js** with **Express** for the backend, and **SQLite** as the database.
 
-Features
-Form Submission: Users can submit work orders via a form.
-Timer: A timer to record work time, with start, pause, and stop functionalities.
-Data Table: Displays logged work orders.
-Search Functionality: Allows users to search through logged work orders.
-Edit and Delete: Users can edit and delete existing work orders.
-Technology Stack
-Frontend: React, React Bootstrap
-Backend: Node.js, Express.js
-Database: SQLite
-Getting Started
-Prerequisites
-Node.js
-npm (Node Package Manager)
-Installation
-1. Clone the repository:
+## Features
+- **Form Submission:** Users can easily submit work orders through a user-friendly form interface.
+- **Timer:** Integrated timer functionality allows users to record work time with start, pause, and stop controls.
+- **Data Table:** Logged work orders are displayed in a data table, providing a clear overview of all entries.
+- **Search Functionality:** 
+  - Search through logged work orders by machine name.
+  - Filter work orders based on date ranges, allowing users to locate records within specific time frames.
+- **Edit and Delete:** Users have the ability to edit and delete existing work orders, ensuring the data remains accurate and up-to-date.
+- **Logbook Tracking:** The system simultaneously tracks work orders for three machines, offering a streamlined process for managing multiple units.
 
-```
-git clone https://github.com/yourusername/work-order-tracker.git
-cd work-order-tracker
-```
-2. Install backend dependencies:
+## Technology Stack
+- **Frontend:** [React](https://reactjs.org/), [React Bootstrap](https://react-bootstrap.github.io/)
+- **Backend:** [Node.js](https://nodejs.org/), [Express.js](https://expressjs.com/)
+- **Database:** [SQLite](https://www.sqlite.org/)
+
+## Getting Started
+
+### Prerequisites
+- [Node.js](https://nodejs.org/)
+- [npm (Node Package Manager)](https://www.npmjs.com/)
+
+### Installation
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/johanneshilmer/logbook.git
+
+2. **Install backend dependencies:**
 
 ```
 cd server
