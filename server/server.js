@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const moment = require('moment-timezone');
 const cors = require('cors');
 const db = require('./database');
 const PORT = 3001;
@@ -23,8 +24,6 @@ app.use(cors());
 app.use(express.json());
 
 // API Endpoints
-
-
 // Create a new form
 app.post('/api/forms', (req, res) => {
   const { parent, name, workOrder, program, radios, workTime, solderTest, comment } = req.body;
@@ -32,34 +31,29 @@ app.post('/api/forms', (req, res) => {
   let changeOver = '00:00:00';
 
   try {
-    const currentDateTime = new Date();
-    const time = currentDateTime.toTimeString().split(' ')[0];
-    const date = currentDateTime.toISOString().split('T')[0].replace(/-/g, '/');
+    // Use Swedish time zone for current date and time
+    const currentDateTime = moment().tz('Europe/Stockholm');
+    const time = currentDateTime.format('HH:mm');
+    const date = currentDateTime.format('YYYY/MM/DD');
     const stopTime = time;
 
     // Get the latest form from the database with the same parent
     const prevForm = db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 1').get(parent);
 
     if (prevForm) {
-      // Update the stopTime for the previous form
-      db.prepare('UPDATE forms SET stopTime = ? WHERE id = ?').run(stopTime, prevForm.id);
+      // Correct date and time parsing "Stockholm" time zone
+      const prevDate = moment(prevForm.date, 'YYYY/MM/DD').format('YYYY-MM-DD');
+      const prevTime = prevForm.stopTime ? moment(prevForm.stopTime, 'HH:mm:ss').format('HH:mm:ss') : moment(prevForm.time, 'HH:mm:ss').format('HH:mm:ss'); // Use stopTime if available
+      const prevDateTime = moment.tz(`${prevDate} ${prevTime}`, 'YYYY-MM-DD HH:mm:ss', 'Europe/Stockholm');
 
-      // Construct the Date object for previous stopTime
-      const [prevHours, prevMinutes, prevSeconds] = (prevForm.stopTime || prevForm.time).split(':');
-      const [prevYear, prevMonth, prevDay] = prevForm.date.split('/').map(Number);
-      const prevDateTime = new Date(prevYear, prevMonth - 1, prevDay, prevHours, prevMinutes, prevSeconds);
-
-      // Construct the Date object for current time
-      const currentDateTimeLocal = new Date(currentDateTime.getFullYear(), currentDateTime.getMonth(), currentDateTime.getDate(), currentDateTime.getHours(), currentDateTime.getMinutes(), currentDateTime.getSeconds());
-
-      // Calculate changeOver time
-      const changeOverMs = currentDateTimeLocal.getTime() - prevDateTime.getTime();
+      // Calculate changeOver time using moment methods
+      const changeOverMs = currentDateTime.diff(prevDateTime);
 
       if (changeOverMs > 0) {
-        const changeOverSeconds = Math.floor(changeOverMs / 1000);
-        const hours = Math.floor(changeOverSeconds / 3600).toString().padStart(2, '0');
-        const minutes = Math.floor((changeOverSeconds % 3600) / 60).toString().padStart(2, '0');
-        const seconds = (changeOverSeconds % 60).toString().padStart(2, '0');
+        const changeOverDuration = moment.duration(changeOverMs);
+        const hours = Math.floor(changeOverDuration.asHours()).toString().padStart(2, '0');
+        const minutes = changeOverDuration.minutes().toString().padStart(2, '0');
+        const seconds = changeOverDuration.seconds().toString().padStart(2, '0');
         changeOver = `${hours}:${minutes}:${seconds}`;
       }
     }
@@ -77,7 +71,6 @@ app.post('/api/forms', (req, res) => {
     res.status(500).json({ error: 'Failed to create form' });
   }
 });
-
 
 
 // Get forms data
@@ -295,9 +288,6 @@ io.on('connection', (socket) => {
     io.emit('formDeleted', formId);
   });
 });
-
-
-
 
 
 // Start the server
