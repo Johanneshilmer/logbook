@@ -187,7 +187,7 @@ export default function Forms({
       </Row>
 
       <Form.Group className="mb-3" controlId="formProgram">
-        <FloatingLabel label="Siplace Program">
+        <FloatingLabel label="Program">
           <Form.Control placeholder="Siplace Program" name="program" value={dataForm.program} onChange={handleChange} onKeyDown={(e) => handleEnterKey(e, 'comment')}/>
         </FloatingLabel>
       </Form.Group>
