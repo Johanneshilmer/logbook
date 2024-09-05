@@ -5,12 +5,21 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
   const [formData, setFormData] = useState({
     solderTest: item?.solderTest ?? false,
     comment: item?.comment ?? "",
+    radios: item?.radios ?? "TOP",
   });
+
+  // Predefined radios options
+  const radios = [
+    { name: 'TOP', value: 'TOP' },
+    { name: 'BOTTOM', value: 'BOT' },
+    { name: 'SETUP', value: 'SETUP' },
+  ];
 
   useEffect(() => {
     setFormData({
       solderTest: item?.solderTest ?? false,
       comment: item?.comment ?? "",
+      radios: item?.radios ?? "TOP",
     });
   }, [item]);
 
@@ -43,6 +52,21 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
               name="solderTest"
               onChange={handleChange}
             />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formRadios">
+            <Form.Label>Select Site</Form.Label>
+            <Form.Select
+              name="radios"
+              value={formData.radios}
+              onChange={handleChange}
+            >
+              {radios.map((radio, index) => (
+                <option key={index} value={radio.value}>
+                  {radio.name}
+                </option>
+              ))}
+            </Form.Select>
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="floatingTextarea">
