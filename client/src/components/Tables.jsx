@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 import EditModal from './EditModal';
 import SocketContext from '../socket/SocketContext';
 import axios from 'axios';
@@ -8,6 +9,8 @@ import axios from 'axios';
 export default function Tables({ dataForms, setDataForms, timerStatus, setTimerStatus, parentIdentifier, editColor }) {
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   const socket = useContext(SocketContext);
 
@@ -66,16 +69,23 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
     };
   }, [socket, handleNewForm, handleUpdatedForm, handleDeletedForm, handleTimerStatusUpdate]);
 
-  const deleteHandler = async (id) => {
-    if ((timerStatus === 'started' || timerStatus === 'paused' || timerStatus === 'resumed') && dataForms.length > 0 && dataForms[0].id === id) {
+  const deleteHandler = (id) => {
+    const itemToDelete = dataForms.find(item => item.id === id);
+    setItemToDelete(itemToDelete);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if ((timerStatus === 'started' || timerStatus === 'paused' || timerStatus === 'resumed') && dataForms.length > 0 && dataForms[0].id === itemToDelete.id) {
       alert("Cannot delete the first row while the timer is running or paused.");
       return;
     }
 
     try {
-      await axios.delete(`/api/forms/${id}`, { params: { parent: parentIdentifier } });
-      setDataForms(prevDataForms => prevDataForms.filter(item => item.id !== id));
-      socket.emit('deleteForm', { parent: parentIdentifier, id });
+      await axios.delete(`/api/forms/${itemToDelete.id}`, { params: { parent: parentIdentifier } });
+      setDataForms(prevDataForms => prevDataForms.filter(item => item.id !== itemToDelete.id));
+      socket.emit('deleteForm', { parent: parentIdentifier, id: itemToDelete.id });
+      setShowDeleteModal(false);
     } catch (error) {
       console.error('Error deleting data:', error);
     }
@@ -173,6 +183,25 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
           item={editingItem}
           handleSaveEdit={handleSaveEdit}
         />
+      )}
+
+      {showDeleteModal && (
+        <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Delete</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Delete work order: {itemToDelete?.workOrder}?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
       )}
     </div>
   );
