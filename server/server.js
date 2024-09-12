@@ -33,7 +33,7 @@ app.post('/api/forms', (req, res) => {
   try {
     // Use Swedish time zone for current date and time
     const currentDateTime = moment().tz('Europe/Stockholm');
-    const time = currentDateTime.format('HH:mm');
+    const time = currentDateTime.format('HH:mm:ss'); // Ensure to include seconds in time
     const date = currentDateTime.format('YYYY/MM/DD');
     const stopTime = time;
 
@@ -41,21 +41,23 @@ app.post('/api/forms', (req, res) => {
     const prevForm = db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 1').get(parent);
 
     if (prevForm) {
-      // Correct date and time parsing "Stockholm" time zone
-      const prevDate = moment(prevForm.date, 'YYYY/MM/DD').format('YYYY-MM-DD');
-      const prevTime = prevForm.stopTime ? moment(prevForm.stopTime, 'HH:mm:ss').format('HH:mm:ss') : moment(prevForm.time, 'HH:mm:ss').format('HH:mm:ss'); // Use stopTime if available
-      const prevDateTime = moment.tz(`${prevDate} ${prevTime}`, 'YYYY-MM-DD HH:mm:ss', 'Europe/Stockholm');
+      // Parse the previous stop time and current start time
+      const prevStopTime = moment(prevForm.stopTime || prevForm.time, 'HH:mm:ss'); // Use stopTime if available, fallback to time
+      const currentStartTime = moment(time, 'HH:mm:ss'); // Parse current time only
 
-      // Calculate changeOver time using moment methods
-      const changeOverMs = currentDateTime.diff(prevDateTime);
-
-      if (changeOverMs > 0) {
-        const changeOverDuration = moment.duration(changeOverMs);
-        const hours = Math.floor(changeOverDuration.asHours()).toString().padStart(2, '0');
-        const minutes = changeOverDuration.minutes().toString().padStart(2, '0');
-        const seconds = changeOverDuration.seconds().toString().padStart(2, '0');
-        changeOver = `${hours}:${minutes}:${seconds}`;
+      // If crossing midnight, adjust by adding a day to the current start time
+      if (currentStartTime.isBefore(prevStopTime)) {
+        currentStartTime.add(1, 'day'); // Midnight cross-over
       }
+
+      // Calculate the changeOver
+      const changeOverMs = currentStartTime.diff(prevStopTime);
+      const changeOverDuration = moment.duration(changeOverMs);
+
+      const hours = Math.floor(changeOverDuration.asHours()).toString().padStart(2, '0');
+      const minutes = changeOverDuration.minutes().toString().padStart(2, '0');
+      const seconds = changeOverDuration.seconds().toString().padStart(2, '0');
+      changeOver = `${hours}:${minutes}:${seconds}`;
     }
 
     // Insert the new form data into the database
