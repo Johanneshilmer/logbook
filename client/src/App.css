@@ -26,6 +26,7 @@
 /* ------------------------------------------------Timer */
 
 .page-title {
+  font-weight: bold;
   text-decoration: underline;
 }
 
@@ -39,6 +40,19 @@
 
 .table-action {
   width: 112px;
+}
+
+.custom-table {
+  white-space: nowrap;
+}
+
+.table-comment {
+  white-space: normal;
+  font-size: 0.8rem;
+}
+
+.custom-table th {
+  font-size: 0.8rem;
 }
 
 .custom-table th,
@@ -94,3 +108,7 @@
 
 
 /*----------------------------------------------------- FORM --*/
+
+.stopBtn {
+  margin-right: 5px;
+}

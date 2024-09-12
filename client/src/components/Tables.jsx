@@ -191,7 +191,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
             <Modal.Title>Confirm Delete</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            Delete work order: {itemToDelete?.workOrder}?
+            Delete work order: {itemToDelete?.workOrder}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>

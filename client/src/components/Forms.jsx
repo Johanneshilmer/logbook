@@ -238,7 +238,7 @@ export default function Forms({
         )}
         {timerStatus === 'paused' && (
           <div>
-            <Button variant="danger" type="button" onClick={handleStopSubmit}>
+            <Button className='stopBtn' variant="danger" type="button" onClick={handleStopSubmit}>
               STOP
             </Button>
             <Button variant='success' type="button" onClick={handleResumeSubmit}>
@@ -248,7 +248,7 @@ export default function Forms({
         )}
         {(timerStatus === 'started' || timerStatus === 'resumed') && (
           <div>
-            <Button variant="danger" type="button" onClick={handleStopSubmit}>
+            <Button className='stopBtn' variant="danger" type="button" onClick={handleStopSubmit}>
               STOP
             </Button>
             {(timerStatus === 'started' || timerStatus === 'resumed') && (
