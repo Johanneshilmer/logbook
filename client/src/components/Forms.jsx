@@ -22,6 +22,7 @@ export default function Forms({
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOT' },
     { name: 'SETUP', value: 'SETUP' },
+    { name: 'DownTime', value: 'DownTime'},
   ];
 
   const formatTime = (elapsedTime) => {

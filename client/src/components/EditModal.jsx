@@ -13,6 +13,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOT' },
     { name: 'SETUP', value: 'SETUP' },
+    { name: 'DownTime', value: 'DownTime'},
   ];
 
   useEffect(() => {

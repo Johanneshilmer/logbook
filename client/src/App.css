@@ -61,6 +61,10 @@
     vertical-align: middle;
 }
 
+.custom-table td {
+  font-size: 0.9rem;
+}
+
 .custom-table .table-comment {
   width: 280px;
   text-align: left;

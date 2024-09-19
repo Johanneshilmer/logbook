@@ -94,9 +94,9 @@ export default function Franziskaner({ socket }) {
   return (
     <div>
       <Header />
-      <Container className="mt-4">
-        <Row>
-          <Col>
+      <Container fluid className="mt-4">
+        <Row className="d-flex justify-content-center">
+          <Col md={4}>
             <Forms
               editColor={editButton}
               toggleColor={toggleButton}
@@ -112,7 +112,7 @@ export default function Franziskaner({ socket }) {
               elapsedTime={elapsedTime}
             />
           </Col>
-          <Col>
+          <Col md={4}>
             <Timer 
               text="Franziskaner" 
               start={timerStart} 
@@ -124,15 +124,17 @@ export default function Franziskaner({ socket }) {
             />
           </Col>
         </Row>
-        <Row className="mt-5">
-          <Tables
-            editColor={editButton}
-            dataForms={dataForms}
-            setDataForms={setDataForms}
-            timerStatus={timerStatus}
-            parentIdentifier={parentIdentifier}
-            setTimerStatus={setTimerStatus}
-          />
+        <Row className="mt-5 d-flex justify-content-center">
+          <Col md={11}>
+            <Tables
+              editColor={editButton}
+              dataForms={dataForms}
+              setDataForms={setDataForms}
+              timerStatus={timerStatus}
+              parentIdentifier={parentIdentifier}
+              setTimerStatus={setTimerStatus}
+            />
+          </Col> 
         </Row>
       </Container>
     </div>

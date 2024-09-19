@@ -52,6 +52,7 @@ export default function SearchPage() {
     <tr key={items.id}>
       <td>{items.date}</td>
       <td>{formatTime(items.time)}</td>
+      <td>{formatTime(items.stopTime)}</td>
       <td>{items.workOrder}</td>
       <td className='table-program'>{items.program}</td>
       <td>{items.changeOver}</td>
@@ -80,9 +81,9 @@ export default function SearchPage() {
   return (
     <div>
       <Header />
-      <Container className="mt-4">
-        <Row>
-          <Col>
+      <Container fluid className="mt-4">
+        <Row className="d-flex justify-content-center">
+          <Col md={8}>
             <h2>Search</h2>
             <Form>
               <Form.Group controlId="searchQuery">
@@ -129,8 +130,8 @@ export default function SearchPage() {
             </Form>
           </Col>
         </Row>
-        <Row className="mt-4">
-          <Col>
+        <Row className="mt-4 mt-5 d-flex justify-content-center">
+          <Col md={11}>
             <h3>
               Results <span>: {sortedDataForms.length} {sortedDataForms.length > 1 ? 'Changeovers' : 'Changeover'}</span>
 
@@ -142,6 +143,7 @@ export default function SearchPage() {
                     <tr>
                       <th>Date</th>
                       <th>Start Time</th>
+                      <th>Stop Time</th>
                       <th>Order</th>
                       <th>Program</th>
                       <th>Change Over Time</th>

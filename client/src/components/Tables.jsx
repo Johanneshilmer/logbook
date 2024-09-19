@@ -125,13 +125,15 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
     return time ? time.slice(0, 5) : '';
   };
 
+
   return (
     <div className="table-responsive">
       <Table striped bordered hover className="custom-table">
         <thead>
           <tr>
             <th>Date</th>
-            <th>Start time</th>
+            <th>Start Time</th>
+            <th>Stop Time</th>
             <th>Work Order</th>
             <th>Program</th>
             <th>Change Over Time</th>
@@ -148,6 +150,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
             <tr key={`${items.id}-${index}`}>
               <td>{items.date}</td>
               <td>{formatTime(items.time)}</td>
+              <td>{formatTime(items.stopTime)}</td>
               <td>{items.workOrder}</td>
               <td className='table-program'>{items.program}</td>
               <td>{items.changeOver}</td>
