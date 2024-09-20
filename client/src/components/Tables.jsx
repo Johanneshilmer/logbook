@@ -136,9 +136,9 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
             <th>Stop Time</th>
             <th>Work Order</th>
             <th>Program</th>
-            <th>Change Over Time</th>
-            <th>Site</th>
             <th>Work Time</th>
+            <th>Site</th>
+            <th>Change Over</th>
             <th>Solder Test</th>
             <th>ID</th>
             <th>Comment</th>
@@ -153,9 +153,9 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
               <td>{formatTime(items.stopTime)}</td>
               <td>{items.workOrder}</td>
               <td className='table-program'>{items.program}</td>
-              <td>{items.changeOver}</td>
-              <td>{items.radios}</td>
               <td>{items.workTime}</td>
+              <td>{items.radios}</td>
+              <td>{items.changeOver}</td>
               <td>{items.solderTest ? "Y" : "N"}</td>
               <td>{items.name}</td>
               <td className='table-comment'>{items.comment}</td>

@@ -31,7 +31,7 @@
 }
 
 .timer {
-  font-size: 4rem;
+  font-size: 4.5rem;
   font-weight: 500;
 }
 
@@ -41,6 +41,8 @@
 .table-action {
   width: 112px;
 }
+
+
 
 .custom-table {
   white-space: nowrap;
@@ -59,10 +61,6 @@
 .custom-table td {
     text-align: center;
     vertical-align: middle;
-}
-
-.custom-table td {
-  font-size: 0.9rem;
 }
 
 .custom-table .table-comment {
@@ -115,4 +113,9 @@
 
 .stopBtn {
   margin-right: 5px;
+}
+
+.fixed-width {
+  min-width: 550px;
+  flex: 0 0 300px;
 }

@@ -96,7 +96,7 @@ export default function Mackmyra({ socket }) {
       <Header />
       <Container fluid className="mt-4">
         <Row  className="d-flex justify-content-center">
-          <Col md={4}>
+          <Col md={4} className="fixed-width">
             <Forms
               editColor={editButton}
               toggleColor={toggleButton}
@@ -112,7 +112,7 @@ export default function Mackmyra({ socket }) {
               elapsedTime={elapsedTime}
             />
           </Col>
-          <Col md={4}>
+          <Col md={5}>
             <Timer 
               text="Mackmyra" 
               start={timerStart} 
