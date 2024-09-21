@@ -118,6 +118,7 @@
       }
 }
 
+/*------------------------------------Responsive display: none*/
 @media (max-width: 1300px) {
   .main-id {
     display: none;
@@ -137,7 +138,7 @@
   .main-program {
     display: none;
   }
-  .table-program {
+  .responise-program {
     display: none;
   }
 }

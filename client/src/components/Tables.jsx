@@ -152,7 +152,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
               <td>{formatTime(items.time)}</td>
               <td>{formatTime(items.stopTime)}</td>
               <td>{items.workOrder}</td>
-              <td className='table-program'>{items.program}</td>
+              <td id='responise-program' className='table-program'>{items.program}</td>
               <td>{items.workTime}</td>
               <td>{items.radios}</td>
               <td>{items.changeOver}</td>
