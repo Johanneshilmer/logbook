@@ -35,6 +35,12 @@
   font-weight: 500;
 }
 
+@media (max-width: 960px) {
+  .timer-container {
+    display: none;
+  }
+}
+
 
 /* ------------------------------------------------Table */
 
@@ -51,6 +57,7 @@
 .table-comment {
   white-space: normal;
   font-size: 0.8rem;
+  min-width: 200px;
 }
 
 .custom-table th {
@@ -82,7 +89,10 @@
 /* Media query for screens smaller than 1200px */
 @media (max-width: 1200px) {
     .custom-table {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+    }
+    .table-comment {
+      font-size: 0.7rem;
     }
     
     .custom-table th,
@@ -106,6 +116,30 @@
       .custom-table .deletebtn {
           padding: 4px 8px;
       }
+}
+
+@media (max-width: 1300px) {
+  .main-id {
+    display: none;
+  }
+  .table-id {
+    display: none;
+  }
+  .main-date {
+    display: none;
+  }
+  .table-date {
+    display: none;
+  }
+}
+
+@media (max-width: 1160px) {
+  .main-program {
+    display: none;
+  }
+  .table-program {
+    display: none;
+  }
 }
 
 

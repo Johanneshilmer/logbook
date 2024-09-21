@@ -96,7 +96,7 @@ export default function Augustiner({ socket }) {
       <Header />
       <Container fluid className="mt-4">
         <Row className="d-flex justify-content-center">
-          <Col md={4} className="fixed-width">
+          <Col className="fixed-width" md={4}>
             <Forms
               editColor={editButton}
               toggleColor={toggleButton}
@@ -112,7 +112,7 @@ export default function Augustiner({ socket }) {
               elapsedTime={elapsedTime}
             />
           </Col>
-          <Col md={5}>
+          <Col md={5} className="timer-container">
             <Timer 
               text="Augustiner"
               start={timerStart} 

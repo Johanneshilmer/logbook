@@ -112,7 +112,7 @@ export default function Franziskaner({ socket }) {
               elapsedTime={elapsedTime}
             />
           </Col>
-          <Col md={5}>
+          <Col md={5} className="timer-container">
             <Timer 
               text="Franziskaner" 
               start={timerStart} 

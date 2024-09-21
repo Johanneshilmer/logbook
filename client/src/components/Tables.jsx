@@ -131,16 +131,16 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
       <Table striped bordered hover className="custom-table">
         <thead>
           <tr>
-            <th>Date</th>
+            <th className='main-date'>Date</th>
             <th>Start Time</th>
             <th>Stop Time</th>
             <th>Work Order</th>
-            <th>Program</th>
+            <th className='main-program'>Program</th>
             <th>Work Time</th>
             <th>Site</th>
             <th>Change Over</th>
             <th>Solder Test</th>
-            <th>ID</th>
+            <th className='main-id'>ID</th>
             <th>Comment</th>
             <th>Actions</th>
           </tr>
@@ -148,7 +148,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
         <tbody>
           {displayedDataForms.map((items, index) => (
             <tr key={`${items.id}-${index}`}>
-              <td>{items.date}</td>
+              <td className='table-date'>{items.date}</td>
               <td>{formatTime(items.time)}</td>
               <td>{formatTime(items.stopTime)}</td>
               <td>{items.workOrder}</td>
@@ -157,7 +157,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
               <td>{items.radios}</td>
               <td>{items.changeOver}</td>
               <td>{items.solderTest ? "Y" : "N"}</td>
-              <td>{items.name}</td>
+              <td className='table-id'>{items.name}</td>
               <td className='table-comment'>{items.comment}</td>
               <td>
                 <div className='action-buttons'>
