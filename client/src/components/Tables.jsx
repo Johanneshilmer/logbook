@@ -138,7 +138,7 @@ export default function Tables({ dataForms, setDataForms, timerStatus, setTimerS
             <th className='main-program'>Program</th>
             <th>Work Time</th>
             <th>Site</th>
-            <th>Change Over</th>
+            <th>Changeover</th>
             <th>Solder Test</th>
             <th className='main-id'>ID</th>
             <th>Comment</th>

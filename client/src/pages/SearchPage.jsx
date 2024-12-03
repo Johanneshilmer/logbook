@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Form, Table } from 'react-bootstrap';
-import Pagination from 'react-bootstrap/Pagination';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Header from '../components/Header';
@@ -10,23 +9,21 @@ export default function SearchPage() {
   const today = new Date();
   const [query, setQuery] = useState('');
   const [parent, setParent] = useState('');
+  const [solderTest, setSolderTest] = useState('');
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
   const [results, setResults] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage] = useState(50);
 
   const handleSearch = useCallback(async () => {
     try {
       const response = await axios.get('/api/search', {
-        params: { query, parent, startDate, endDate }
+        params: { query, parent, startDate, endDate, solderTest }
       });
       setResults(response.data);
-      setCurrentPage(1);
     } catch (error) {
       console.error('Error searching data:', error);
     }
-  }, [query, parent, startDate, endDate]);
+  }, [query, parent, startDate, endDate, solderTest]);
 
   useEffect(() => {
     handleSearch();
@@ -38,17 +35,40 @@ export default function SearchPage() {
     return dateB - dateA;
   });
 
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = sortedDataForms.slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.ceil(sortedDataForms.length / rowsPerPage);
-
-
   const formatTime = (time) => {
     return time ? time.slice(0, 5) : '';
   };
 
-  const tableRows = currentRows.map((items) => (
+  const calculateAverageChangeOver = () => {
+    // Filter out rows where ChangeOver is "DOWNTIME"
+    const filteredData = sortedDataForms.filter(item => item.radios && item.radios !== 'DOWNTIME');
+  
+    if (filteredData.length === 0) return "00:00:00";
+  
+    const totalChangeOverMinutes = filteredData.reduce((acc, item) => {
+      const timeParts = item.changeOver?.split(':');
+      if (timeParts && timeParts.length === 3) {
+        const [hours, minutes, seconds] = timeParts.map(part => parseInt(part, 10));
+        const totalMinutes = hours * 60 + minutes + seconds / 60;
+        return acc + totalMinutes;
+      }
+      return acc;
+    }, 0);
+  
+    // Calculate the average in minutes
+    const averageMinutes = totalChangeOverMinutes / filteredData.length;
+  
+    // Convert average minutes to hours, minutes, and seconds
+    const hours = Math.floor(averageMinutes / 60);
+    const minutes = Math.floor(averageMinutes % 60);
+    const seconds = Math.round((averageMinutes % 1) * 60);
+  
+    // Format as HH:MM:SS
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
+  
+
+  const tableRows = sortedDataForms.map((items) => (
     <tr key={items.id}>
       <td>{items.date}</td>
       <td>{formatTime(items.time)}</td>
@@ -59,24 +79,12 @@ export default function SearchPage() {
       <td>{items.radios}</td>
       <td>{items.changeOver}</td>
       <td>{items.solderTest ? 'Y' : 'N'}</td>
+      <td>{items.solderResult}</td>
       <td>{items.name}</td>
       <td className='table-comment'>{items.comment}</td>
       <td>{items.parent}</td>
     </tr>
   ));
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const paginationItems = [];
-  for (let number = 1; number <= totalPages; number++) {
-    paginationItems.push(
-      <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
-        {number}
-      </Pagination.Item>
-    );
-  }
 
   return (
     <div>
@@ -124,6 +132,14 @@ export default function SearchPage() {
                       dateFormat="yyyy-MM-dd"
                     />
                   </Col>
+                  <Col>
+                    <Form.Label>Solder Test</Form.Label>
+                    <Form.Select as="select" value={solderTest} onChange={(e) => setSolderTest(e.target.value)}>
+                      <option value="">All</option>
+                      <option value="Y">Y</option>
+                      <option value="N">N</option>
+                    </Form.Select>
+                  </Col>
                 </Row>
               </Form.Group>
               
@@ -134,7 +150,9 @@ export default function SearchPage() {
           <Col md={11}>
             <h3>
               Results <span>: {sortedDataForms.length} {sortedDataForms.length > 1 ? 'Changeovers' : 'Changeover'}</span>
-
+            </h3>
+            <h3>
+              Average Changeover: {calculateAverageChangeOver()} Min
             </h3>
             {results.length > 0 ? (
               <div className='table-responsive'>
@@ -148,8 +166,9 @@ export default function SearchPage() {
                       <th>Program</th>
                       <th>Work Time</th>
                       <th>Site</th>
-                      <th>Change Over</th>
+                      <th>Changeover</th>
                       <th>Solder Test</th>
+                      <th>Solder Result</th>
                       <th>ID</th>
                       <th>Comment</th>
                       <th>Machine</th>
@@ -157,17 +176,6 @@ export default function SearchPage() {
                   </thead>
                   <tbody>{tableRows}</tbody>
                 </Table>
-                <Pagination className="justify-content-center custom-pagination">
-                  <Pagination.First onClick={() => handlePageChange(1)} />
-                  <Pagination.Prev
-                    onClick={() => handlePageChange(currentPage > 1 ? currentPage - 1 : 1)}
-                  />
-                  {paginationItems}
-                  <Pagination.Next
-                    onClick={() => handlePageChange(currentPage < totalPages ? currentPage + 1 : totalPages)}
-                  />
-                  <Pagination.Last onClick={() => handlePageChange(totalPages)} />
-                </Pagination>
               </div>
             ) : (
               <p>No results found</p>

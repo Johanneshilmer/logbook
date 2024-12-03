@@ -22,7 +22,7 @@ export default function Forms({
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOT' },
     { name: 'SETUP', value: 'SETUP' },
-    { name: 'DownTime', value: 'DownTime'},
+    { name: 'DOWNTIME', value: 'DOWNTIME'},
   ];
 
   const formatTime = (elapsedTime) => {
@@ -212,6 +212,8 @@ export default function Forms({
             ))}
           </ButtonGroup>
         </Col>
+
+        {/* Solder test in form
         <Col>
           <Form.Check
             className='mt-2' 
@@ -223,6 +225,8 @@ export default function Forms({
             onChange={handleChange}
           />
         </Col>
+         */}
+         
       </Row>
 
       <Form.Group className='mb-3' controlId="floatingTextarea">

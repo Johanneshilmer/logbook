@@ -6,6 +6,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
     solderTest: item?.solderTest ?? false,
     comment: item?.comment ?? "",
     radios: item?.radios ?? "TOP",
+    solderResult: item?.solderResult || "", // Ensure this starts as an empty string
   });
 
   // Predefined radios options
@@ -13,7 +14,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
     { name: 'TOP', value: 'TOP' },
     { name: 'BOTTOM', value: 'BOT' },
     { name: 'SETUP', value: 'SETUP' },
-    { name: 'DownTime', value: 'DownTime'},
+    { name: 'DownTime', value: 'DownTime' },
   ];
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
       solderTest: item?.solderTest ?? false,
       comment: item?.comment ?? "",
       radios: item?.radios ?? "TOP",
+      solderResult: item?.solderResult || "", // Fallback to an empty string if null or undefined
     });
   }, [item]);
 
@@ -34,6 +36,17 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
 
   const handleSubmit = e => {
     e.preventDefault();
+
+    // If solderTest is unchecked, set solderResult to "-"
+    if (!formData.solderTest) {
+      formData.solderResult = "-";
+    }
+
+    if (formData.solderTest && formData.solderResult === "-") {
+      alert('Please select a solder result.');
+      return;
+    }
+
     handleSaveEdit(item.id, formData);
   };
 
@@ -54,6 +67,22 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
               onChange={handleChange}
             />
           </Form.Group>
+
+          {/* Conditionally render the dropdown based on solderTest */}
+          {formData.solderTest && (
+            <Form.Group className="mb-3" controlId="formSolderResult">
+              <Form.Label>Test Result</Form.Label>
+              <Form.Select
+                name="solderResult"
+                value={formData.solderResult || ""} // Ensure it starts as an empty string
+                onChange={handleChange}
+              >
+                <option value="-">Select result</option>
+                <option value="Good">Good</option>
+                <option value="Bad">Bad</option>
+              </Form.Select>
+            </Form.Group>
+          )}
 
           <Form.Group className="mb-3" controlId="formRadios">
             <Form.Label>Select Site</Form.Label>

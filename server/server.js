@@ -7,13 +7,11 @@ const db = require('./database');
 const PORT = 3001;
 require('dotenv').config();
 
-const dbHost = process.env.DB_HOST
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: dbHost,
+    origin: 'http://localhost:3000',
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
     credentials: true
@@ -26,7 +24,7 @@ app.use(express.json());
 // API Endpoints
 // Create a new form
 app.post('/api/forms', (req, res) => {
-  const { parent, name, workOrder, program, radios, workTime, solderTest, comment } = req.body;
+  const { parent, name, workOrder, program, radios, workTime, solderTest, comment, solderResult = '-' } = req.body; // default to 'Good' if solderResult is not provided
 
   let changeOver = '00:00:00';
 
@@ -61,10 +59,10 @@ app.post('/api/forms', (req, res) => {
     }
 
     // Insert the new form data into the database
-    const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, changeOver, workTime, solderTest, comment, date, time, stopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const info = stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, comment, date, time, stopTime);
+    const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, changeOver, workTime, solderTest, solderResult, comment, date, time, stopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, solderResult, comment, date, time, stopTime);
 
-    const newForm = { ...req.body, id: info.lastInsertRowid, changeOver, date, time, stopTime };
+    const newForm = { ...req.body, id: info.lastInsertRowid, changeOver, date, time, stopTime, solderResult };
     io.emit('newForm', { parent, ...newForm });
 
     res.status(201).json({ id: info.lastInsertRowid });
@@ -94,12 +92,13 @@ app.get('/api/forms', (req, res) => {
 
 
 // Update a form
+// Update a form
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
-  const { parent, name, workOrder, program, radios, changeOver, workTime, solderTest, comment, date, time, stopTime } = req.body;
+  const { parent, name, workOrder, program, radios, changeOver, workTime, solderTest, solderResult, comment, date, time, stopTime } = req.body;
 
   try {
-    // Prepare the SQL statement to update all relevant fields, including stopTime
+    // Prepare the SQL statement to update all relevant fields, including solderResult and stopTime
     const stmt = db.prepare(`
       UPDATE forms 
       SET parent = ?, 
@@ -110,6 +109,7 @@ app.put('/api/forms/:id', (req, res) => {
           changeOver = ?, 
           workTime = ?, 
           solderTest = ?, 
+          solderResult = ?, 
           comment = ?, 
           date = ?, 
           time = ?, 
@@ -117,9 +117,9 @@ app.put('/api/forms/:id', (req, res) => {
       WHERE id = ?
     `);
     
-    stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, comment, date, time, stopTime, id);
+    stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, solderResult, comment, date, time, stopTime, id);
     
-    const updatedForm = { id, parent, name, workOrder, program, radios, changeOver, workTime, solderTest, comment, date, time, stopTime };
+    const updatedForm = { id, parent, name, workOrder, program, radios, changeOver, workTime, solderTest, solderResult, comment, date, time, stopTime };
     
     // Emit the update to connected clients
     io.emit('formUpdated', updatedForm);
@@ -130,6 +130,7 @@ app.put('/api/forms/:id', (req, res) => {
     res.status(500).json({ error: 'Failed to update form' });
   }
 });
+
 
 
 // Delete a form by ID
@@ -151,14 +152,20 @@ app.delete('/api/forms/:id', (req, res) => {
 
 // Search functionality with correct date and time handling
 app.get('/api/search', (req, res) => {
-  const { parent, query, startDate, endDate } = req.query;
+  const { parent, query, startDate, endDate, solderTest } = req.query;
 
-  let baseQuery = 'SELECT * FROM forms WHERE (name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ?)';
-  let params = [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
+  let baseQuery = 'SELECT * FROM forms WHERE (name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ? OR solderResult LIKE ?)';
+  let params = [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
 
   if (parent) {
     baseQuery += ' AND parent = ?';
     params.push(parent);
+  }
+
+  if (solderTest) {
+    const solderTestValue = solderTest === 'Y' ? 1.0 : 0.0;
+    baseQuery += ' AND solderTest = ?';
+    params.push(solderTestValue);
   }
 
   // Function to convert date to the correct format (yyyy/mm/dd) and adjust to start or end of the day
