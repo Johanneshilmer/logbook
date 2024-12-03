@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import SelektivHeader from '../../components/SelektivHeader';
 import SelektivForm from '../../components/SelektivForm';
 import Timer from '../../components/Timer';
-import Tables from '../../components/Tables';
+import SelektivTables from '../../components/SelektivTables';
 import axios from 'axios';
 
 export default function Selektiv2({ socket }) {
@@ -126,7 +126,7 @@ export default function Selektiv2({ socket }) {
         </Row>
         <Row className="mt-5 d-flex justify-content-center">
           <Col md={11}>
-            <Tables 
+            <SelektivTables 
               editColor={editButton}
               dataForms={dataForms}
               setDataForms={setDataForms}

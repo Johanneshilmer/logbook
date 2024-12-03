@@ -157,7 +157,7 @@ export default function SearchPage() {
             </Col>
             <Col>
               <h3>
-                Average Changeover Time: {calculateAverageChangeOver()} min
+                Average Changeover (hh:mm) : {calculateAverageChangeOver()} min
               </h3>
             </Col>
           </Row>
