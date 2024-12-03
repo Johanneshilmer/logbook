@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navbar, Nav, Container, Row, Col } from 'react-bootstrap';
+import '../App.css'
 
 export default function Home() {
   return (
@@ -26,27 +27,27 @@ export default function Home() {
   </Navbar>
 
   <Container className="my-5">
-    <Row className="flex-md-equal">
+    <Row id='home-main' className="flex-md-equal">
       {/* Left Column */}
       <Col className="text-center p-5">
-        <h2 className="display-4"><strong>SMT</strong></h2>
-        <div className="bg-dark text-white box-shadow mx-auto py-5" style={{ width: '85%', height: '350px', borderRadius: '25px', }}>
-          <a href="#augustiner" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Augustiner</a>
-          <a href="#franziskaner" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Franziskaner</a>
-          <a href="#mackmyra" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Mackmyra</a>
-          <a href="#smt-search" className="d-block fs-4 text-white text-decoration-none hover-link">Search</a>
+        <h2 className="display-5"><strong>SMT</strong></h2>
+        <div id='home-content' className="bg-dark text-white box-shadow mx-auto py-5" style={{ width: '85%', height: '350px', borderRadius: '25px', }}>
+          <a id='home-item' href="#augustiner" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Augustiner</a>
+          <a id='home-item' href="#franziskaner" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Franziskaner</a>
+          <a id='home-item' href="#mackmyra" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Mackmyra</a>
+          <a id='home-item' href="#smt-search" className="d-block fs-4 text-white text-decoration-none hover-link">Search</a>
         </div>
       </Col>
 
       {/* Right Column */}
       <Col className="text-center p-5">
-        <h2 className="display-4"><strong>Vamal</strong></h2>
-        <div className="bg-dark text-white box-shadow mx-auto py-5" style={{ width: '85%',height: '350px',borderRadius: '25px', }}>
-          <a href="#blyad-vaglodning" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Blyad Våglödning</a>
-          <a href="#blyfri-vaglodning" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Blyfri Våglödning</a>
-          <a href="#selektiv2" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Selektiv2</a>
-          <a href="#selektiv3" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link"> Selektiv3</a>
-          <a href="#selektiv-search" className="d-block fs-4 text-white text-decoration-none hover-link">Search</a>
+        <h2 className="display-5"><strong>Selektiv/Våglödning</strong></h2>
+        <div id='home-content' className="bg-dark text-white box-shadow mx-auto py-5" style={{ width: '85%',height: '350px',borderRadius: '25px', }}>
+          <a id='home-item' href="#blyad-vaglodning" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Blyad Våglödning</a>
+          <a id='home-item' href="#blyfri-vaglodning" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Blyfri Våglödning</a>
+          <a id='home-item' href="#selektiv2" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Selektiv2</a>
+          <a id='home-item' href="#selektiv3" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link"> Selektiv3</a>
+          <a id='home-item' href="#selektiv-search" className="d-block fs-4 text-white text-decoration-none hover-link">Search</a>
         </div>
       </Col>
     </Row>
