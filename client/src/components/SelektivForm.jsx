@@ -10,7 +10,7 @@ import axios from 'axios';
 import SocketContext from '../socket/SocketContext';
 
 
-export default function Forms({ 
+export default function SelektivForm({ 
   dataForms, 
   setDataForms, 
   parent,
@@ -19,9 +19,7 @@ export default function Forms({
   elapsedTime  // Receive elapsedTime from the Timer component
 }) {
   const radios = [
-    { name: 'TOP', value: 'TOP' },
-    { name: 'BOTTOM', value: 'BOT' },
-    { name: 'SETUP', value: 'SETUP' },
+    { name: 'PRODUCTION', value: 'PRODUCTION' },
     { name: 'DOWNTIME', value: 'DOWNTIME'},
   ];
 

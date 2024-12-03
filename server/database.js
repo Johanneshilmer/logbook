@@ -1,16 +1,10 @@
 const Database = require("better-sqlite3");
+
 const db = new Database("database.db", { verbose: console.log });
+const selektivDb = new Database("selektiv_database.db", { verbose: console.log });
 
-// Ensure the solderResult column exists
-try {
-  db.exec(`
-    ALTER TABLE forms ADD COLUMN solderResult TEXT DEFAULT '';
-  `);
-} catch (error) {
-  console.log('Column already exists or another error:', error.message);
-}
-
-db.exec(`
+// Table schema
+const tableSchema = `
   CREATE TABLE IF NOT EXISTS forms (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     parent TEXT,
@@ -27,12 +21,24 @@ db.exec(`
     stopTime TEXT,
     solderResult TEXT DEFAULT ''
   );
-`);
+`;
 
+// SMT Database
+try {
+  db.exec(`
+    ALTER TABLE forms ADD COLUMN solderResult TEXT DEFAULT '';
+  `);
+} catch (error) {
+  console.log("Column already exists or another error:", error.message);
+}
+db.exec(tableSchema);
 db.exec(`
   UPDATE forms
   SET solderResult = '-'
   WHERE solderResult IS NULL OR solderResult = '';
 `);
 
-module.exports = db;
+// Selektiv Database
+selektivDb.exec(tableSchema);
+
+module.exports = { db, selektivDb };

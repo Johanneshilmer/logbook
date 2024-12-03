@@ -3,7 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const moment = require('moment-timezone');
 const cors = require('cors');
-const db = require('./database');
+const { db, selektivDb } = require('./database');
 const PORT = 3001;
 require('dotenv').config();
 
@@ -35,8 +35,10 @@ app.post('/api/forms', (req, res) => {
     const date = currentDateTime.format('YYYY/MM/DD');
     const stopTime = time;
 
-    // Get the latest form from the database with the same parent
-    const prevForm = db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 1').get(parent);
+    // Get the latest form from the correct database
+    const dbToUse = ['Augustiner', 'Franziskaner', 'Mackmyra'].includes(parent) ? db : selektivDb;
+
+    const prevForm = dbToUse.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC LIMIT 1').get(parent);
 
     if (prevForm) {
       // Parse the previous stop time and current start time
@@ -58,8 +60,8 @@ app.post('/api/forms', (req, res) => {
       changeOver = `${hours}:${minutes}:${seconds}`;
     }
 
-    // Insert the new form data into the database
-    const stmt = db.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, changeOver, workTime, solderTest, solderResult, comment, date, time, stopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    // Insert the new form data into the correct database
+    const stmt = dbToUse.prepare('INSERT INTO forms (parent, name, workOrder, program, radios, changeOver, workTime, solderTest, solderResult, comment, date, time, stopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(parent, name, workOrder, program, radios, changeOver, workTime, solderTest ? 1 : 0, solderResult, comment, date, time, stopTime);
 
     const newForm = { ...req.body, id: info.lastInsertRowid, changeOver, date, time, stopTime, solderResult };
@@ -76,13 +78,22 @@ app.post('/api/forms', (req, res) => {
 // Get forms data
 app.get('/api/forms', (req, res) => {
   const parent = req.query.parent;
-
   try {
-    const stmt = parent 
-      ? db.prepare('SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC')
-      : db.prepare('SELECT * FROM forms ORDER BY date DESC, time DESC');
+    // Choose the database based on the parent
+    let chosenDb;
+    if (['Augustiner', 'Franziskaner', 'Mackmyra'].includes(parent)) {
+      chosenDb = db;
+    } else {
+      chosenDb = selektivDb;
+    }
+    // Prepare and execute the query on the selected database
+    const query = parent
+      ? 'SELECT * FROM forms WHERE parent = ? ORDER BY date DESC, time DESC'
+      : 'SELECT * FROM forms ORDER BY date DESC, time DESC';
 
+    const stmt = chosenDb.prepare(query);
     const forms = parent ? stmt.all(parent) : stmt.all();
+
     res.json(forms);
   } catch (error) {
     console.error('Error fetching forms:', error);
@@ -92,14 +103,16 @@ app.get('/api/forms', (req, res) => {
 
 
 // Update a form
-// Update a form
 app.put('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   const { parent, name, workOrder, program, radios, changeOver, workTime, solderTest, solderResult, comment, date, time, stopTime } = req.body;
 
   try {
-    // Prepare the SQL statement to update all relevant fields, including solderResult and stopTime
-    const stmt = db.prepare(`
+    // Determine which database to use based on parent value
+    const dbToUse = ['Augustiner', 'Franziskaner', 'Mackmyra'].includes(parent) ? db : selektivDb;
+
+    // Prepare the SQL statement to update all relevant fields
+    const stmt = dbToUse.prepare(`
       UPDATE forms 
       SET parent = ?, 
           name = ?, 
@@ -133,13 +146,21 @@ app.put('/api/forms/:id', (req, res) => {
 
 
 
+
 // Delete a form by ID
 app.delete('/api/forms/:id', (req, res) => {
   const { id } = req.params;
   const parent = req.query.parent;
 
   try {
-    const stmt = db.prepare('DELETE FROM forms WHERE id = ?');
+    // Choose the database based on the parent
+    let chosenDb;
+    if (['Augustiner', 'Franziskaner', 'Mackmyra'].includes(parent)) {
+      chosenDb = db;
+    } else {
+      chosenDb = selektivDb;
+    }
+    const stmt = chosenDb.prepare('DELETE FROM forms WHERE id = ?');
     stmt.run(id);
     io.emit('formDeleted', { parent, id });
     res.sendStatus(200);
@@ -152,16 +173,22 @@ app.delete('/api/forms/:id', (req, res) => {
 
 // Search functionality with correct date and time handling
 app.get('/api/search', (req, res) => {
-  const { parent, query, startDate, endDate, solderTest } = req.query;
+  const { dbType ,parent, query, startDate, endDate, solderTest } = req.query;
 
+  // Select the db based on dbType
+  const selectedDb = dbType === 'selektiv' ? selektivDb : db;
+
+  // Initialize the base query for searching
   let baseQuery = 'SELECT * FROM forms WHERE (name LIKE ? OR workOrder LIKE ? OR program LIKE ? OR radios LIKE ? OR comment LIKE ? OR date LIKE ? OR solderResult LIKE ?)';
   let params = [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`];
 
+  // Add parent filter based on the parent parameter
   if (parent) {
     baseQuery += ' AND parent = ?';
     params.push(parent);
   }
 
+  // Handle solderTest filter (Y or N)
   if (solderTest) {
     const solderTestValue = solderTest === 'Y' ? 1.0 : 0.0;
     baseQuery += ' AND solderTest = ?';
@@ -173,10 +200,10 @@ app.get('/api/search', (req, res) => {
     let date = new Date(dateString);
 
     if (isEndDate) {
-      // end of the day
+      // Adjust to the end of the day (23:59:59)
       date.setHours(23, 59, 59, 999);
     } else {
-      // start of the day
+      // Adjust to the start of the day (00:00:00)
       date.setHours(0, 0, 0, 0);
     }
 
@@ -187,27 +214,35 @@ app.get('/api/search', (req, res) => {
     return `${year}/${month}/${day}`;
   };
 
+  // Handle date range filters (startDate and endDate)
   if (startDate && endDate) {
-    const startDateFormatted = convertDateForSQL(startDate); // Convert startDate yyyy/mm/dd starting at 00:00:00
-    const endDateFormatted = convertDateForSQL(endDate, true); // Convert endDate yyyy/mm/dd ending at 23:59:59
+    const startDateFormatted = convertDateForSQL(startDate); // Convert startDate to the correct format
+    const endDateFormatted = convertDateForSQL(endDate, true); // Convert endDate to the correct format (end of the day)
     baseQuery += ' AND date BETWEEN ? AND ?';
     params.push(startDateFormatted, endDateFormatted);
   } else if (startDate) {
-    const startDateFormatted = convertDateForSQL(startDate); // Convert startDate yyyy/mm/dd starting at 00:00:00
+    const startDateFormatted = convertDateForSQL(startDate); // Convert startDate to the correct format (start of the day)
     baseQuery += ' AND date >= ?';
     params.push(startDateFormatted);
   } else if (endDate) {
-    const endDateFormatted = convertDateForSQL(endDate, true); // Convert endDate yyyy/mm/dd ending at 23:59:59
+    const endDateFormatted = convertDateForSQL(endDate, true); // Convert endDate to the correct format (end of the day)
     baseQuery += ' AND date <= ?';
     params.push(endDateFormatted);
   }
 
+  // Final query sorting by date and time
   baseQuery += ' ORDER BY date DESC, time DESC';
 
   try {
-    const stmt = db.prepare(baseQuery);
+    // Prepare and execute the query with the specified parameters using the selected database
+    const stmt = selectedDb.prepare(baseQuery);
     const results = stmt.all(...params);
-    res.json(results);
+    res.json(results); // Return the results as a JSON response
+
+    console.log('dbType:', dbType);
+    console.log('Using Database:', dbType === 'selektiv' ? 'selektivDb' : 'db');
+    console.log('Query:', baseQuery);
+
   } catch (error) {
     console.error('Error searching forms:', error);
     res.status(500).json({ error: 'Failed to search forms' });

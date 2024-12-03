@@ -1,19 +1,19 @@
 import { Container, Row, Col } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
-import Header from '../components/Header';
-import Forms from '../components/Forms';
-import Timer from '../components/Timer';
-import Tables from '../components/Tables';
+import SelektivHeader from '../../components/SelektivHeader';
+import SelektivForm from '../../components/SelektivForm';
+import Timer from '../../components/Timer';
+import Tables from '../../components/Tables';
 import axios from 'axios';
 
-export default function Augustiner({ socket }) {
+export default function BlyfriVaglodning({ socket }) {
   const [dataForms, setDataForms] = useState([]);
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
   const [timerStatus, setTimerStatus] = useState('stopped');
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  const parentIdentifier = 'Augustiner';  // Unique identifier for this parent
+  const parentIdentifier = 'Blyfi Våglödning';  // Unique identifier for this parent
 
   const fetchData = async () => {
     try {
@@ -93,11 +93,11 @@ export default function Augustiner({ socket }) {
 
   return (
     <div>
-      <Header />
+      <SelektivHeader />
       <Container fluid className="mt-4">
         <Row className="d-flex justify-content-center">
           <Col className="fixed-width" md={4}>
-            <Forms
+            <SelektivForm
               editColor={editButton}
               toggleColor={toggleButton}
               parent={parentIdentifier}
@@ -114,7 +114,7 @@ export default function Augustiner({ socket }) {
           </Col>
           <Col md={5} className="timer-container">
             <Timer 
-              text="Augustiner"
+              text="Blyfi Våglödning"
               start={timerStart} 
               onUpdate={handleTimerUpdate} 
               socket={socket} 

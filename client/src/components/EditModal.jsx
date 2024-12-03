@@ -6,7 +6,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
     solderTest: item?.solderTest ?? false,
     comment: item?.comment ?? "",
     radios: item?.radios ?? "TOP",
-    solderResult: item?.solderResult || "", // Ensure this starts as an empty string
+    solderResult: item?.solderResult ?? "-", // Explicitly default to "-"
   });
 
   // Predefined radios options
@@ -22,28 +22,33 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
       solderTest: item?.solderTest ?? false,
       comment: item?.comment ?? "",
       radios: item?.radios ?? "TOP",
-      solderResult: item?.solderResult || "", // Fallback to an empty string if null or undefined
+      solderResult: item?.solderResult ?? "-", // Explicitly default to "-"
     });
   }, [item]);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormData((prevData) => {
+      if (name === "solderTest") {
+        return {
+          ...prevData,
+          solderTest: checked,
+          solderResult: checked ? prevData.solderResult : "-", // Reset solderResult if solderTest is toggled off
+        };
+      }
+      return {
+        ...prevData,
+        [name]: type === "checkbox" ? checked : value,
+      };
+    });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    // If solderTest is unchecked, set solderResult to "-"
-    if (!formData.solderTest) {
-      formData.solderResult = "-";
-    }
-
+    // Prevent submission if solderTest is active but solderResult is invalid
     if (formData.solderTest && formData.solderResult === "-") {
-      alert('Please select a solder result.');
+      alert("Please select a solder result.");
       return;
     }
 
@@ -74,7 +79,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
               <Form.Label>Test Result</Form.Label>
               <Form.Select
                 name="solderResult"
-                value={formData.solderResult || ""} // Ensure it starts as an empty string
+                value={formData.solderResult}
                 onChange={handleChange}
               >
                 <option value="-">Select result</option>
@@ -104,7 +109,7 @@ export default function EditModal({ show, onHide, item, handleSaveEdit }) {
               <Form.Control
                 as="textarea"
                 placeholder="Comments"
-                style={{ height: '150px' }}
+                style={{ height: "150px" }}
                 value={formData.comment}
                 name="comment"
                 onChange={handleChange}

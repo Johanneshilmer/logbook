@@ -1,19 +1,19 @@
 import { Container, Row, Col } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
-import Header from '../components/Header';
-import Forms from '../components/Forms';
-import Timer from '../components/Timer';
-import Tables from '../components/Tables';
+import SelektivHeader from '../../components/SelektivHeader';
+import SelektivForm from '../../components/SelektivForm';
+import Timer from '../../components/Timer';
+import Tables from '../../components/Tables';
 import axios from 'axios';
 
-export default function Franziskaner({ socket }) {
+export default function Selektiv2({ socket }) {
   const [dataForms, setDataForms] = useState([]);
   const [timerStart, setTimerStart] = useState(false);
   const [timerValue, setTimerValue] = useState("00:00:00");
   const [timerStatus, setTimerStatus] = useState('stopped');
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  const parentIdentifier = 'Franziskaner';  // Unique identifier for this parent
+  const parentIdentifier = 'Selektiv2';  // Unique identifier for this parent
 
   const fetchData = async () => {
     try {
@@ -88,16 +88,16 @@ export default function Franziskaner({ socket }) {
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  const toggleButton = 'outline-success';
-  const editButton = 'success';
+  const toggleButton = 'outline-info';
+  const editButton = 'info';
 
   return (
     <div>
-      <Header />
+      <SelektivHeader />
       <Container fluid className="mt-4">
         <Row className="d-flex justify-content-center">
-          <Col md={4} className="fixed-width">
-            <Forms
+          <Col className="fixed-width" md={4}>
+            <SelektivForm
               editColor={editButton}
               toggleColor={toggleButton}
               parent={parentIdentifier}
@@ -114,7 +114,7 @@ export default function Franziskaner({ socket }) {
           </Col>
           <Col md={5} className="timer-container">
             <Timer 
-              text="Franziskaner" 
+              text="Selektiv2"
               start={timerStart} 
               onUpdate={handleTimerUpdate} 
               socket={socket} 
@@ -126,7 +126,7 @@ export default function Franziskaner({ socket }) {
         </Row>
         <Row className="mt-5 d-flex justify-content-center">
           <Col md={11}>
-            <Tables
+            <Tables 
               editColor={editButton}
               dataForms={dataForms}
               setDataForms={setDataForms}
@@ -134,7 +134,7 @@ export default function Franziskaner({ socket }) {
               parentIdentifier={parentIdentifier}
               setTimerStatus={setTimerStatus}
             />
-          </Col> 
+          </Col>
         </Row>
       </Container>
     </div>

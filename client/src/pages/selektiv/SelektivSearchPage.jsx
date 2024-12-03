@@ -3,9 +3,9 @@ import axios from 'axios';
 import { Container, Row, Col, Form, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import Header from '../components/Header';
+import SelektivHeader from '../../components/SelektivHeader';
 
-export default function SearchPage() {
+export default function SelektivSearchPage() {
   const today = new Date();
   const [query, setQuery] = useState('');
   const [parent, setParent] = useState('');
@@ -17,7 +17,14 @@ export default function SearchPage() {
   const handleSearch = useCallback(async () => {
     try {
       const response = await axios.get('/api/search', {
-        params: { query, parent, startDate, endDate, solderTest }
+        params: {
+          dbType: 'selektiv',
+          query, 
+          parent, 
+          startDate, 
+          endDate, 
+          solderTest,
+        }
       });
       setResults(response.data);
     } catch (error) {
@@ -42,9 +49,7 @@ export default function SearchPage() {
   const calculateAverageChangeOver = () => {
     // Filter out rows where ChangeOver is "DOWNTIME"
     const filteredData = sortedDataForms.filter(item => item.radios && item.radios !== 'DOWNTIME');
-  
-    if (filteredData.length === 0) return "00:00:00";
-  
+    if (filteredData.length === 0) return "00:00"; // Return "00:00" instead of "00:00:00"
     const totalChangeOverMinutes = filteredData.reduce((acc, item) => {
       const timeParts = item.changeOver?.split(':');
       if (timeParts && timeParts.length === 3) {
@@ -54,17 +59,13 @@ export default function SearchPage() {
       }
       return acc;
     }, 0);
-  
     // Calculate the average in minutes
     const averageMinutes = totalChangeOverMinutes / filteredData.length;
-  
-    // Convert average minutes to hours, minutes, and seconds
+    // Convert average minutes to hours and minutes
     const hours = Math.floor(averageMinutes / 60);
-    const minutes = Math.floor(averageMinutes % 60);
-    const seconds = Math.round((averageMinutes % 1) * 60);
-  
-    // Format as HH:MM:SS
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const minutes = Math.round(averageMinutes % 60); // Round minutes to avoid fractions
+    // Format as HH:MM
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   };
   
 
@@ -88,7 +89,7 @@ export default function SearchPage() {
 
   return (
     <div>
-      <Header />
+      <SelektivHeader />
       <Container fluid className="mt-4">
         <Row className="d-flex justify-content-center">
           <Col md={8}>
@@ -109,9 +110,10 @@ export default function SearchPage() {
                     <Form.Label>Machine Line</Form.Label>
                     <Form.Select as="select" value={parent} onChange={(e) => setParent(e.target.value)}>
                       <option value="">All</option>
-                      <option value="Augustiner">Augustiner</option>
-                      <option value="Franziskaner">Franziskaner</option>
-                      <option value="Mackmyra">Mackmyra</option>
+                      <option value="Blyad Våglödning">Blyad Våglödning</option>
+                      <option value="Blyfi Våglödning">Blyfi Våglödning</option>
+                      <option value="Selektiv2">Selektiv2</option>
+                      <option value="Selektiv3">Selektiv3</option>
                     </Form.Select>
                   </Col>
                   <Col>
@@ -146,14 +148,25 @@ export default function SearchPage() {
             </Form>
           </Col>
         </Row>
-        <Row className="mt-4 mt-5 d-flex justify-content-center">
+
+
+        <Container>
+          <Row className='mt-5'>
+            <Col  xs={4}>
+              <h3>
+                Results <span>: {sortedDataForms.length} {sortedDataForms.length > 1 ? 'Changeovers' : 'Changeover'}</span>
+              </h3>
+            </Col>
+            <Col>
+              <h3>
+                Average Changeover Time: {calculateAverageChangeOver()} min
+              </h3>
+            </Col>
+          </Row>
+        </Container>
+
+        <Row className="mt-2 d-flex justify-content-center">
           <Col md={11}>
-            <h3>
-              Results <span>: {sortedDataForms.length} {sortedDataForms.length > 1 ? 'Changeovers' : 'Changeover'}</span>
-            </h3>
-            <h3>
-              Average Changeover: {calculateAverageChangeOver()} Min
-            </h3>
             {results.length > 0 ? (
               <div className='table-responsive'>
                 <Table striped bordered hover className='custom-table'>
