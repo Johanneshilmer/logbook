@@ -3,7 +3,7 @@ import { Modal, Button, Form, FloatingLabel } from 'react-bootstrap';
 
 export default function SelektivEditModal({ show, onHide, item, handleSaveEdit }) {
   const [formData, setFormData] = useState({
-    solderTest: item?.solderTest ?? false,
+    solderTest: Boolean(item?.solderTest),
     comment: item?.comment ?? "",
     radios: item?.radios ?? "TOP",
     solderResult: item?.solderResult ?? "-", // Explicitly default to "-"
@@ -17,7 +17,7 @@ export default function SelektivEditModal({ show, onHide, item, handleSaveEdit }
 
   useEffect(() => {
     setFormData({
-      solderTest: item?.solderTest ?? false,
+      solderTest: Boolean(item?.solderTest),
       comment: item?.comment ?? "",
       radios: item?.radios ?? "PRODUCTION",
       solderResult: item?.solderResult ?? "-", // Explicitly default to "-"
