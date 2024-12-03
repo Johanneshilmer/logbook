@@ -19,7 +19,7 @@ export default function SelektivEditModal({ show, onHide, item, handleSaveEdit }
     setFormData({
       solderTest: item?.solderTest ?? false,
       comment: item?.comment ?? "",
-      radios: item?.radios ?? "TOP",
+      radios: item?.radios ?? "PRODUCTION",
       solderResult: item?.solderResult ?? "-", // Explicitly default to "-"
     });
   }, [item]);

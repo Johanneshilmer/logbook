@@ -28,26 +28,19 @@ export default function Home() {
   <Container className="my-5">
     <Row className="flex-md-equal">
       {/* Left Column */}
-      <Col className="bg-dark text-white text-center p-5">
-        <h2 className="display-4">SMT</h2>
-        <div
-          className="bg-light box-shadow mx-auto py-5"
-          style={{
-            width: '85%',
-            height: '350px',
-            borderRadius: '25px',
-          }}
-        >
-          <a href="#augustiner" className="d-block mb-3 fs-4 text-dark text-decoration-none hover-link">Augustiner</a>
-          <a href="#franziskaner" className="d-block mb-3 fs-4 text-dark text-decoration-none hover-link">Franziskaner</a>
-          <a href="#mackmyra" className="d-block mb-3 fs-4 text-dark text-decoration-none hover-link">Mackmyra</a>
-          <a href="#smt-search" className="d-block fs-4 text-dark text-decoration-none hover-link">Search</a>
+      <Col className="text-center p-5">
+        <h2 className="display-4"><strong>SMT</strong></h2>
+        <div className="bg-dark text-white box-shadow mx-auto py-5" style={{ width: '85%', height: '350px', borderRadius: '25px', }}>
+          <a href="#augustiner" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Augustiner</a>
+          <a href="#franziskaner" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Franziskaner</a>
+          <a href="#mackmyra" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Mackmyra</a>
+          <a href="#smt-search" className="d-block fs-4 text-white text-decoration-none hover-link">Search</a>
         </div>
       </Col>
 
       {/* Right Column */}
-      <Col className="bg-light text-center p-5">
-        <h2 className="display-4">Vamal</h2>
+      <Col className="text-center p-5">
+        <h2 className="display-4"><strong>Vamal</strong></h2>
         <div className="bg-dark text-white box-shadow mx-auto py-5" style={{ width: '85%',height: '350px',borderRadius: '25px', }}>
           <a href="#blyad-vaglodning" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Blyad Våglödning</a>
           <a href="#blyfri-vaglodning" className="d-block mb-3 fs-4 text-white text-decoration-none hover-link">Blyfri Våglödning</a>
