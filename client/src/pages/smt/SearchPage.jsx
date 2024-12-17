@@ -47,7 +47,7 @@ export default function SearchPage() {
 
   const calculateAverageChangeOver = () => {
     // Filter out rows where ChangeOver is "DOWNTIME"
-    const filteredData = sortedDataForms.filter(item => item.radios && item.radios !== 'DOWNTIME');
+    const filteredData = sortedDataForms.filter(item => item.radios && item.radios !== 'DOWNTIME' && item.radios !== 'DownTime');
     if (filteredData.length === 0) return "00:00"; // Return "00:00" instead of "00:00:00"
     const totalChangeOverMinutes = filteredData.reduce((acc, item) => {
       const timeParts = item.changeOver?.split(':');
